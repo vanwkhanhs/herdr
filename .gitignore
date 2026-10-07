@@ -1,0 +1,14 @@
+# Backup do restore.ps1 / herdr sinh ra
+*.bak-*
+*.bak
+
+# Log va socket cua herdr - khong phai config
+herdr-*.log
+*.sock
+session-snapshots/
+
+# Bi mat - khong bao gio commit
+.credentials.json
+*.key
+id_*
+*.pem

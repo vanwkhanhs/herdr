@@ -1,0 +1,33 @@
+{
+  "model": "opus[1m]",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "^(startup|resume|clear|compact|fork)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\vanwk\\.claude\\hooks\\herdr-agent-state.ps1\" session",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "python \"C:/Users/vanwk/.claude/statusline-usage.py\"",
+    "refreshInterval": 60
+  },
+  "effortLevel": "xhigh",
+  "autoUpdatesChannel": "latest",
+  "theme": "dark",
+  "modelSettings": {
+    "claude-opus-5": {
+      "effortLevel": "high"
+    },
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  }
+}
