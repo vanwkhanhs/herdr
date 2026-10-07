@@ -189,3 +189,34 @@ không nhận diện được agent.
 - Pane `debug` là terminal thuần, đừng khởi động Claude trong đó.
 - `claude/settings.json` tham chiếu `statusline-usage.py` bằng đường dẫn tuyệt đối
   `C:/Users/vanwk/...`. Máy user khác phải sửa lại đường dẫn này (cả đường dẫn hook).
+
+---
+
+## 8. Ghi chú riêng máy này: `HOME` bị OrCAD chiếm
+
+Trên máy firmware hiện tại, biến môi trường hệ thống `HOME` đang trỏ về
+`E:\APP\ORCAD\DATA` (do OrCAD đặt). SSH đọc khoá theo `$HOME/.ssh`, nên mọi lệnh
+`git push` qua SSH đều báo:
+
+```
+git@github.com: Permission denied (publickey).
+```
+
+dù khoá `C:\Users\vanwk\.ssh\id_ed25519` vẫn hợp lệ với GitHub.
+
+Repo này đã đặt sẵn `core.sshCommand` trỏ thẳng vào khoá thật nên `git push` chạy
+được ngay:
+
+```powershell
+git config core.sshCommand "ssh -i C:/Users/vanwk/.ssh/id_ed25519 -o IdentitiesOnly=yes -o UserKnownHostsFile=C:/Users/vanwk/.ssh/known_hosts"
+```
+
+`core.sshCommand` nằm trong `.git/config` nên **không** đi theo repo khi clone — máy
+mới phải đặt lại nếu cũng dính `HOME` sai. Muốn sửa dứt điểm cho mọi repo thì đặt ở
+mức global:
+
+```powershell
+git config --global core.sshCommand "ssh -i $env:USERPROFILE/.ssh/id_ed25519 -o IdentitiesOnly=yes"
+```
+
+Không nên xoá biến `HOME` vì OrCAD đang dùng.
