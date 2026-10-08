@@ -12,10 +12,13 @@
     hien thi title song cua tien trinh chu khong phai ten dat bang 'terminal rename'.
     Ten tab dat bang 'terminal rename' - mot tab chi co mot ten, dung chung cho ca 3 pane.
 
-    Idempotent:
-      - Project da co tu 3 pane tro len  -> bo qua.
-      - Project dang co agent chay       -> bo qua kem canh bao, khong dong gi.
-      - Project chi con terminal trong   -> dong roi dung lai 3 pane.
+    Idempotent, quyet dinh theo CO AGENT HAY KHONG (khong theo so pane):
+      - Project dang co agent chay     -> bo qua, khong dong gi.
+      - Project khong co agent nao      -> dong terminal trong roi dung lai 3 pane.
+
+    Khong xet so pane la co y: sau khi tat may bat lai, Orca khoi phuc dung so
+    tab cu nhung KHONG chay lai lenh khoi dong, nen 3 pane do chi la shell trong.
+    Neu xet theo so pane thi script se bo qua va khong project nao co Claude.
 
 .PARAMETER Project
     Chi xu ly mot project, khop theo ten hoac duong dan. Bo trong = tat ca.
@@ -98,14 +101,13 @@ $built = 0; $skipped = 0; $failed = 0
 foreach ($p in $targets) {
     $mine = @($all | Where-Object { $_.worktreePath -eq $p.Path })
 
-    if ($mine.Count -ge 3) {
-        Write-Host ("  bo qua   {0}  (da co {1} pane)" -f $p.Name, $mine.Count) -ForegroundColor DarkGray
-        $skipped++; continue
-    }
-
+    # Quyet dinh dua tren CO AGENT HAY KHONG, khong dua tren so pane.
+    # Sau khi tat may bat lai, Orca khoi phuc dung so tab cu nhung lenh khoi dong
+    # KHONG chay lai - 3 pane do chi la shell trong. Neu xet theo so pane thi
+    # script se bo qua va khong project nao co Claude.
     $live = @($mine | Where-Object { $_.agentIdentity })
     if ($live.Count -gt 0) {
-        Write-Warning ("{0}: dang co {1} agent chay - bo qua de khong dong nham viec dang lam" -f $p.Name, $live.Count)
+        Write-Host ("  bo qua   {0}  (da co {1} agent chay)" -f $p.Name, $live.Count) -ForegroundColor DarkGray
         $skipped++; continue
     }
 
