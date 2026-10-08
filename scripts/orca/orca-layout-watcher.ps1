@@ -1,39 +1,64 @@
 <#
 .SYNOPSIS
-    Theo doi Orca; moi lan Orca duoc mo len thi dung lai layout 3 pane mot lan.
+    Theo doi Orca: cho moi project ngu khi mo app, va dung layout khi nguoi dung
+    bam vao mot project o sidebar.
 
 .DESCRIPTION
-    Orca khong tu khoi dong cung Windows va khong co hook luc mo app, nen cach
-    duy nhat de "tu chay luc mo Orca" la mot watcher nhe chay nen:
+    Hai viec, tach bach:
 
-      - Khong co tien trinh orca -> cho tiep (khong lam Orca khoi dong).
-      - Thay runtimeId KHAC lan truoc -> day la lan mo moi: cho vai giay cho
-        worktree nap xong roi goi orca-layout.ps1, sau do don vai luot.
+    1. **Lan mo Orca moi** (nhan ra bang runtimeId doi) -> cho tat ca project
+       duoc quan ly NGU. Khong dung pane nao. Moi pane Claude an ~440 MB; dung
+       du 7 project la ~6,6 GB ngay khi mo Orca cho nhung thu chua dung den.
+
+       Dung 'terminal close --worktree <path> --all', dang nay Orca xoa luon tab,
+       layout va resume record - nen lan mo sau no cung khong khoi phuc gi.
+
+    2. **Nguoi dung bam vao mot project o sidebar** -> Orca mo mot PowerShell
+       trong, khong Claude, khong lich su. Watcher thay project do co terminal
+       nhung chua co pane ten 'builder' thi dung day du builder + reviewer + debug,
+       resume dung phien cu.
+
+    Vi buoc 1 da xoa sach tab va resume record, moi terminal xuat hien sau do
+    trong mot project deu la do nguoi dung tu bam - khong con nham voi tab Orca
+    tu khoi phuc nua.
 
     Nhan dien lan mo moi bang runtimeId chu khong bang "co thay Orca tat khong":
     watcher poll 5 giay mot lan, nguoi dung dong roi mo lai Orca nhanh hon the
     nen khong bao gio thay khoang trong. Da hong that - 4/5 project mat sach pane
     ma watcher van tuong dang la phien cu.
 
-    Tieu thu gan nhu bang khong: moi $PollSeconds chi goi Get-Process mot lan,
-    chi khi thay Orca song moi hoi 'orca status'.
-
 .PARAMETER PollSeconds
-    Khoang cach giua hai lan kiem tra. Mac dinh 5 giay.
+    Nhip kiem tra. Mac dinh 5 giay.
 
 .PARAMETER SettleSeconds
-    Cho bao lau sau khi runtime ready moi dung layout. Mac dinh 12 giay.
+    Cho bao lau sau khi runtime ready moi cho ngu. Mac dinh 12 giay.
+
+.PARAMETER BuildAll
+    Tro lai kieu cu: mo Orca la dung du tat ca project. Mac dinh TAT.
 
 .EXAMPLE
     .\orca-layout-watcher.ps1
+    .\orca-layout-watcher.ps1 -BuildAll
 #>
 
 [CmdletBinding()]
 param(
-    [int]$PollSeconds       = 5,
-    [int]$SettleSeconds     = 12,
-    [int]$PruneAfterSeconds = 60,   # giu lai cho tuong thich, nhip that nam o $schedule
-    [int]$PruneAttempts     = 6
+    [int]$PollSeconds   = 5,
+    [int]$SettleSeconds = 12,
+
+    # Cua so an han sau khi cho ngu: trong khoang nay, terminal nao xuat hien
+    # trong project duoc quan ly deu bi coi la Orca khoi phuc muon va bi cho ngu
+    # tiep, KHONG dung layout.
+    #
+    # Can co vi 'close --all' khong chan het duoc: da do thay Orca van khoi phuc
+    # them tab cho mot project khac sau khi da ngu, va watcher tuong nguoi dung
+    # bam vao do roi dung layout khong ai yeu cau.
+    #
+    # Danh doi: bam vao project trong khoang nay se bi dong, bam lai la duoc. Vi
+    # vay giu that ngan - dot khoi phuc muon do duoc den trong ~25 giay sau khi ngu.
+    [int]$SleepGraceSeconds = 45,
+
+    [switch]$BuildAll
 )
 
 $ErrorActionPreference = 'Continue'
@@ -51,6 +76,14 @@ function Write-Log {
     Add-Content -LiteralPath $LogFile -Value $line -Encoding utf8
 }
 
+function Invoke-Layout {
+    param([string[]]$LayoutArgs)
+    # -WindowStyle Hidden: thieu co nay thi luc dang nhap co mot cua so console
+    # nhay len, in ca loi JSON cua 'herdr pane list' khi Herdr chua chay.
+    $out = & powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File $LayoutScript @LayoutArgs
+    foreach ($l in @($out)) { if ("$l".Trim()) { Write-Log ("  " + $l) } }
+}
+
 $Orca = (Get-Command orca -ErrorAction SilentlyContinue).Source
 if (-not $Orca) {
     $fallback = Join-Path $env:LOCALAPPDATA 'Programs\orca\resources\bin\orca.exe'
@@ -58,89 +91,110 @@ if (-not $Orca) {
 }
 if (-not $Orca) { throw "Khong tim thay orca CLI." }
 
-Write-Log "watcher bat dau (poll=${PollSeconds}s settle=${SettleSeconds}s)"
+# Danh sach project doc tu orca-layout.ps1 - mot nguon su that duy nhat
+$Projects = @()
+foreach ($line in (Get-Content -LiteralPath $LayoutScript)) {
+    if ($line -match "Name\s*=\s*'([^']+)'\s*;\s*Path\s*=\s*'([^']+)'") {
+        $Projects += [pscustomobject]@{ Name = $Matches[1]; Path = $Matches[2] }
+    }
+}
+if ($Projects.Count -eq 0) { throw "Khong doc duoc project nao tu orca-layout.ps1" }
 
+Write-Log ("watcher bat dau (poll=${PollSeconds}s settle=${SettleSeconds}s, {0} project, BuildAll={1})" -f $Projects.Count, [bool]$BuildAll)
+
+# Neu Orca DANG chay san luc watcher khoi dong, nhan lay runtime do va KHONG coi
+# la lan mo moi. Thieu buoc nay thi moi lan khoi dong lai watcher deu cho ngu het,
+# dong mat nhung project nguoi dung dang mo - da gap that: nguoi dung vua bam mo
+# KZ_E02 luc 15:09:03, watcher khoi dong lai luc 15:09:54 va dong ngay lap tuc.
 $lastRuntimeId = $null
+try {
+    if (Get-Process -Name orca -ErrorAction SilentlyContinue) {
+        $s0 = ((& $Orca status --json) -join "`n") | ConvertFrom-Json
+        if ($s0.result.runtime.state -eq 'ready') {
+            $lastRuntimeId = $s0.result.runtime.runtimeId
+            Write-Log "Orca da chay san (runtime $lastRuntimeId) - nhan lay, khong cho ngu"
+        }
+    }
+} catch { }
+
+$graceUntil = $null
 
 while ($true) {
 
-    $proc = Get-Process -Name orca -ErrorAction SilentlyContinue
-
-    if (-not $proc) {
+    if (-not (Get-Process -Name orca -ErrorAction SilentlyContinue)) {
         if ($lastRuntimeId) { Write-Log "Orca da tat - cho lan mo sau" }
         $lastRuntimeId = $null
         Start-Sleep -Seconds $PollSeconds
         continue
     }
 
-    # Nhan dien lan mo moi bang runtimeId chu KHONG bang "co thay Orca tat khong".
-    # Cach cu hong that: watcher poll 5 giay mot lan, nguoi dung dong roi mo lai
-    # Orca nhanh hon the nen watcher khong bao gio thay khoang trong, tuong van la
-    # phien cu va khong dung lai layout. Hau qua: 4/5 project mat sach pane va
-    # khong duoc dung lai cho den khi co nguoi chay tay.
     $ready = $false
     $runtimeId = $null
     try {
-        $raw = & $Orca status --json
-        $s = ($raw -join "`n") | ConvertFrom-Json
+        $s = ((& $Orca status --json) -join "`n") | ConvertFrom-Json
         $ready = ($s.result.runtime.state -eq 'ready') -and ($s.result.app.running -eq $true)
         $runtimeId = $s.result.runtime.runtimeId
-    } catch {
-        $ready = $false
-    }
+    } catch { $ready = $false }
 
-    if (-not $ready) {
-        Start-Sleep -Seconds $PollSeconds
-        continue
-    }
+    if (-not $ready) { Start-Sleep -Seconds $PollSeconds; continue }
 
-    if ($runtimeId -and $runtimeId -eq $lastRuntimeId) {
-        Start-Sleep -Seconds $PollSeconds
-        continue
-    }
+    # ---- Lan mo Orca moi ----
+    if ($runtimeId -ne $lastRuntimeId) {
+        $lastRuntimeId = $runtimeId
+        Write-Log "Orca mo moi (runtime $runtimeId) - cho ${SettleSeconds}s"
+        Start-Sleep -Seconds $SettleSeconds
 
-    if ($lastRuntimeId) { Write-Log "Orca co runtime moi ($runtimeId) - dung lai layout" }
-    $lastRuntimeId = $runtimeId
-
-    Write-Log "Orca ready - cho ${SettleSeconds}s roi dung layout"
-    Start-Sleep -Seconds $SettleSeconds
-
-    try {
-        # -WindowStyle Hidden: thieu co nay thi luc dang nhap co mot cua so console
-        # nhay len, in ca loi JSON cua 'herdr pane list' khi Herdr chua chay.
-        $out = & powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File $LayoutScript
-        foreach ($l in @($out)) { Write-Log ("  " + $l) }
-        Write-Log "dung layout xong"
-
-        # Cac luot don. Orca khoi phuc tab cu CHAM hon luc dung layout, va khong
-        # phai mot lan ma THANH NHIEU DOT rai ra vai phut. Mot luot don sau 60
-        # giay la khong du - da gap that: luot don 11:24:53 bao sach, nhung den
-        # 11:26 KZ_E02 lai co them mot tab cu ba pane.
-        #
-        # Nen don lap lai trong mot cua so thoi gian. Het cua so thi dung han:
-        # sau do terminal moi trong project la do nguoi dung tu mo, khong duoc dong.
-        # Nhip thua dan: dot khoi phuc cua Orca den som va day nhat trong phut dau,
-        # nen don day o do roi gian ra. Cho 60s moi don lan dau la qua lau -
-        # nguoi dung kip nhin thay tab cu hien ra.
-        $schedule = @(10, 10, 15, 15, 30, 30, 60, 60, 120, 120)
-        for ($k = 0; $k -lt $schedule.Count; $k++) {
-            $wait = $schedule[$k]
-            Write-Log ("cho {0}s roi don (luot {1}/{2})" -f $wait, ($k + 1), $schedule.Count)
-            Start-Sleep -Seconds $wait
-
-            if (-not (Get-Process -Name orca -ErrorAction SilentlyContinue)) {
-                Write-Log "Orca da tat - bo cac luot don con lai"
-                break
+        try {
+            if ($BuildAll) {
+                Write-Log "dung du tat ca project (-BuildAll)"
+                Invoke-Layout @()
+            } else {
+                Write-Log "cho tat ca project ngu"
+                Invoke-Layout @('-SleepAll')
+                $graceUntil = (Get-Date).AddSeconds($SleepGraceSeconds)
+                Write-Log ("an han {0}s - tab Orca khoi phuc muon se bi cho ngu tiep" -f $SleepGraceSeconds)
             }
-
-            $out2 = & powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File $LayoutScript -Prune
-            foreach ($l in @($out2)) { Write-Log ("  " + $l) }
+        } catch {
+            Write-Log ("LOI luc mo moi: " + $_.Exception.Message)
         }
-        Write-Log "don xong"
-    } catch {
-        Write-Log ("LOI khi dung layout: " + $_.Exception.Message)
+
+        Start-Sleep -Seconds $PollSeconds
+        continue
     }
 
-    # runtimeId da duoc ghi nhan o tren - khong can co rieng nua
+    # ---- Trong cua so an han: cho ngu tiep, khong dung gi ----
+    if ($graceUntil -and (Get-Date) -lt $graceUntil) {
+        try {
+            $t = ((& $Orca terminal list --json) -join "`n") | ConvertFrom-Json
+            $terms = @($t.result.terminals | Where-Object { -not $_.orphaned })
+            $paths = @($Projects | ForEach-Object { $_.Path })
+            if (@($terms | Where-Object { $paths -contains $_.worktreePath }).Count -gt 0) {
+                Write-Log "con tab khoi phuc muon - cho ngu tiep"
+                Invoke-Layout @('-SleepAll')
+            }
+        } catch { }
+        Start-Sleep -Seconds $PollSeconds
+        continue
+    }
+
+    # ---- Cung mot lan mo: theo doi nguoi dung bam vao project ----
+    # Project nao co terminal nhung chua co pane ten 'builder' nghia la nguoi dung
+    # vua bam mo no va Orca chi cho mot PowerShell trong -> dung layout cho no.
+    try {
+        $t = ((& $Orca terminal list --json) -join "`n") | ConvertFrom-Json
+        $terms = @($t.result.terminals | Where-Object { -not $_.orphaned })
+
+        foreach ($p in $Projects) {
+            $mine = @($terms | Where-Object { $_.worktreePath -eq $p.Path })
+            if ($mine.Count -eq 0) { continue }
+            if (@($mine | ForEach-Object { [string]$_.title }) -contains 'builder') { continue }
+
+            Write-Log ("nguoi dung mo {0} - dung layout" -f $p.Name)
+            Invoke-Layout @('-Project', $p.Name)
+        }
+    } catch {
+        Write-Log ("LOI luc theo doi: " + $_.Exception.Message)
+    }
+
     Start-Sleep -Seconds $PollSeconds
 }

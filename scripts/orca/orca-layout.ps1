@@ -45,7 +45,12 @@
 param(
     [string]$Project,
     [switch]$DryRun,
-    [switch]$Prune
+    [switch]$Prune,
+
+    # Dong het terminal cua cac project duoc quan ly, dua tat ca ve trang thai ngu.
+    # Dung '--worktree --all' nen Orca xoa luon tab, layout va resume record - lan
+    # mo Orca sau no khong khoi phuc gi cho nhung project nay.
+    [switch]$SleepAll
 )
 
 $ErrorActionPreference = 'Stop'
@@ -201,6 +206,23 @@ $all = @($listed.result.terminals)
 # Chi dong xac trong worktree cua cac project duoc quan ly - khong dung toi
 # project khac, nhat la pane nguoi dung dang ngoi lam viec.
 $managed = @($Projects | ForEach-Object { $_.Path })
+
+# ---- -SleepAll: cho tat ca ngu roi thoat ----
+if ($SleepAll) {
+    $n = 0
+    foreach ($p in $targets) {
+        $mine = @($all | Where-Object { $_.worktreePath -eq $p.Path })
+        if ($mine.Count -eq 0) { continue }
+        if ($DryRun) { Write-Host ("  [thu]    cho ngu {0} ({1} terminal)" -f $p.Name, $mine.Count); continue }
+        Invoke-Orca @('terminal','close','--worktree',"path:$($p.Path)",'--all','--json') | Out-Null
+        Write-Host ("  ngu      {0}  (dong {1} terminal)" -f $p.Name, $mine.Count) -ForegroundColor DarkGray
+        $n++
+    }
+    Write-Host ""
+    Write-Host ("Da cho ngu: {0} project" -f $n) -ForegroundColor Cyan
+    return
+}
+
 $orphans = @($all | Where-Object { $_.orphaned -and ($managed -contains $_.worktreePath) })
 
 if ($orphans.Count -gt 0) {
