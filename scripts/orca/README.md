@@ -77,9 +77,18 @@ phai co space tuong ung ben Herdr voi pane dat ten `builder` / `reviewer`.
 
 ## An toan
 
-Quyet dinh theo **co agent hay khong**, khong theo so pane: project dang co agent
-chay thi bo qua, khong dong viec dang lam. Khong xet so pane la co y - sau khi
-tat may bat lai, Orca khoi phuc dung so tab cu nhung do chi la shell trong.
+Chi bo qua khi layout **thuc su lanh**: du ba pane dung ten builder/reviewer/debug
+VA co agent chay. Thieu mot trong hai la dung lai.
+
+Hai dieu kien chu khong mot, vi ca hai deu da tung sai:
+
+- Chi xet **so pane** -> sau khi bat may lai, Orca khoi phuc du tab nhung do la
+  shell trong, script bo qua, khong project nao co Claude.
+- Chi xet **co agent** -> Orca van bao agentIdentity=claude cho pane khoi phuc
+  hong (lenh bi cat cut, ten pane ve `* Claude Code`), script bo qua va de
+  nguyen trang thai hong.
+
+Ten pane la bang chung tin cay vi chi `pane.ps1` moi dat duoc dung ba ten do.
 
 Che do quyen (`auto mode` / `bypass permissions`) di theo phien duoc resume,
 khong phai theo `settings.json`.

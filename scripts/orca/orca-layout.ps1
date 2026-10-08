@@ -12,13 +12,18 @@
     hien thi title song cua tien trinh chu khong phai ten dat bang 'terminal rename'.
     Ten tab dat bang 'terminal rename' - mot tab chi co mot ten, dung chung cho ca 3 pane.
 
-    Idempotent, quyet dinh theo CO AGENT HAY KHONG (khong theo so pane):
-      - Project dang co agent chay     -> bo qua, khong dong gi.
-      - Project khong co agent nao      -> dong terminal trong roi dung lai 3 pane.
+    Idempotent. Chi bo qua khi layout THUC SU LANH:
+      - Du ba pane dung ten builder/reviewer/debug VA co agent chay -> bo qua.
+      - Moi truong hop khac -> dong het roi dung lai 3 pane.
 
-    Khong xet so pane la co y: sau khi tat may bat lai, Orca khoi phuc dung so
-    tab cu nhung KHONG chay lai lenh khoi dong, nen 3 pane do chi la shell trong.
-    Neu xet theo so pane thi script se bo qua va khong project nao co Claude.
+    Hai dieu kien, thieu mot la dung lai:
+      * Khong xet so pane: sau khi tat may bat lai, Orca khoi phuc dung so tab
+        cu nhung KHONG chay lai lenh khoi dong - do chi la shell trong.
+      * Khong chi xet 'co agent': Orca van bao agentIdentity=claude cho pane
+        khoi phuc hong (lenh bi cat cut, ten pane ve '* Claude Code'). Da gap
+        that - script bo qua va de nguyen trang thai hong.
+
+    Ten pane la bang chung tin cay vi chi pane.ps1 moi dat duoc dung ba ten do.
 
 .PARAMETER Project
     Chi xu ly mot project, khop theo ten hoac duong dan. Bo trong = tat ca.
@@ -142,14 +147,29 @@ $built = 0; $skipped = 0; $failed = 0
 foreach ($p in $targets) {
     $mine = @($all | Where-Object { $_.worktreePath -eq $p.Path })
 
-    # Quyet dinh dua tren CO AGENT HAY KHONG, khong dua tren so pane.
-    # Sau khi tat may bat lai, Orca khoi phuc dung so tab cu nhung lenh khoi dong
-    # KHONG chay lai - 3 pane do chi la shell trong. Neu xet theo so pane thi
-    # script se bo qua va khong project nao co Claude.
-    $live = @($mine | Where-Object { $_.agentIdentity })
-    if ($live.Count -gt 0) {
-        Write-Host ("  bo qua   {0}  (da co {1} agent chay)" -f $p.Name, $live.Count) -ForegroundColor DarkGray
+    # Chi bo qua khi layout THUC SU LANH: du ba pane dung ten VA co agent chay.
+    #
+    # Khong xet so pane: sau khi tat may bat lai, Orca khoi phuc dung so tab cu
+    # nhung do chi la shell trong.
+    #
+    # Khong chi xet 'co agent': Orca van bao agentIdentity=claude cho nhung pane
+    # khoi phuc hong (lenh khoi dong bi cat cut, ten pane ve '* Claude Code').
+    # Da gap that - script bo qua va de nguyen trang thai hong.
+    #
+    # Ten pane la bang chung tin cay: chi pane.ps1 moi dat duoc dung ba ten nay
+    # (WindowTitle + CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1). Khoi phuc hong thi
+    # ten se khac.
+    $live   = @($mine | Where-Object { $_.agentIdentity })
+    $titles = @($mine | ForEach-Object { [string]$_.title })
+    $named  = ($titles -contains 'builder') -and ($titles -contains 'reviewer') -and ($titles -contains 'debug')
+
+    if ($live.Count -gt 0 -and $named) {
+        Write-Host ("  bo qua   {0}  (layout lanh, {1} agent chay)" -f $p.Name, $live.Count) -ForegroundColor DarkGray
         $skipped++; continue
+    }
+
+    if ($live.Count -gt 0) {
+        Write-Warning ("{0}: co {1} agent nhung ten pane sai - khoi phuc hong, dung lai" -f $p.Name, $live.Count)
     }
 
     if ($DryRun) {
