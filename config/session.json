@@ -50,10 +50,10 @@
         "is_linked_worktree": false
       },
       "public_pane_numbers": {
-        "5": 5,
+        "3": 2,
         "2": 1,
         "4": 4,
-        "3": 2
+        "5": 5
       },
       "next_public_pane_number": 6,
       "public_tab_numbers": [
@@ -96,6 +96,10 @@
                 "value": "68bd292b-4360-4796-8d28-11b1b8fb674b"
               }
             },
+            "4": {
+              "cwd": "E:\\Kztek_Firmwave\\Access_Control\\KZ_E02.NET\\",
+              "label": "debug"
+            },
             "2": {
               "cwd": "E:\\Kztek_Firmwave\\Access_Control\\KZ_E02.NET\\",
               "label": "builder",
@@ -105,10 +109,6 @@
                 "kind": "id",
                 "value": "6bd5ee92-d1ba-47d7-886d-21c14c355cd1"
               }
-            },
-            "4": {
-              "cwd": "E:\\Kztek_Firmwave\\Access_Control\\KZ_E02.NET\\",
-              "label": "debug"
             }
           },
           "zoomed": false,
@@ -171,10 +171,6 @@
             }
           },
           "panes": {
-            "8": {
-              "cwd": "E:\\Kztek_Firmwave\\Elevator\\kz_e32.net_firmware-dev1\\",
-              "label": "debug"
-            },
             "6": {
               "cwd": "E:\\Kztek_Firmwave\\Elevator\\kz_e32.net_firmware-dev1\\",
               "label": "builder",
@@ -184,6 +180,10 @@
                 "kind": "id",
                 "value": "c88ea3f9-ef76-4a11-b661-6cf32e4c6e86"
               }
+            },
+            "8": {
+              "cwd": "E:\\Kztek_Firmwave\\Elevator\\kz_e32.net_firmware-dev1\\",
+              "label": "debug"
             },
             "7": {
               "cwd": "E:\\Kztek_Firmwave\\Elevator\\kz_e32.net_firmware-dev1\\",
@@ -279,9 +279,9 @@
       "custom_name": "iLocker 12CH",
       "identity_cwd": "E:\\Kztek_Firmwave\\iLocker\\board_12ch\\smart_lock_control_12ch\\",
       "public_pane_numbers": {
-        "14": 3,
         "12": 1,
-        "13": 2
+        "13": 2,
+        "14": 3
       },
       "next_public_pane_number": 4,
       "public_tab_numbers": [
@@ -313,9 +313,15 @@
             }
           },
           "panes": {
-            "14": {
+            "12": {
               "cwd": "E:\\Kztek_Firmwave\\iLocker\\board_12ch\\smart_lock_control_12ch\\",
-              "label": "debug"
+              "label": "builder",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "36ec59d9-0fe6-4bed-8165-b6172e5a6727"
+              }
             },
             "13": {
               "cwd": "E:\\Kztek_Firmwave\\iLocker\\board_12ch\\smart_lock_control_12ch\\",
@@ -327,15 +333,9 @@
                 "value": "2d5216b9-70a0-4a30-9bd2-05c1d06d54bb"
               }
             },
-            "12": {
+            "14": {
               "cwd": "E:\\Kztek_Firmwave\\iLocker\\board_12ch\\smart_lock_control_12ch\\",
-              "label": "builder",
-              "agent_session": {
-                "source": "herdr:claude",
-                "agent": "claude",
-                "kind": "id",
-                "value": "36ec59d9-0fe6-4bed-8165-b6172e5a6727"
-              }
+              "label": "debug"
             }
           },
           "zoomed": false,
@@ -394,10 +394,6 @@
                 "value": "c057823e-4c0b-4a3f-9e74-a60f789e8d1a"
               }
             },
-            "17": {
-              "cwd": "E:\\Kztek_Firmwave\\KzFlashTool\\",
-              "label": "debug"
-            },
             "16": {
               "cwd": "E:\\Kztek_Firmwave\\KzFlashTool\\",
               "label": "reviewer",
@@ -407,6 +403,10 @@
                 "kind": "id",
                 "value": "2f08b849-260a-45b5-a58e-ff09f22e8248"
               }
+            },
+            "17": {
+              "cwd": "E:\\Kztek_Firmwave\\KzFlashTool\\",
+              "label": "debug"
             }
           },
           "zoomed": false,
@@ -421,9 +421,9 @@
       "custom_name": "RV1126B dual cam 5MP",
       "identity_cwd": "E:\\project_kztek\\SDK_RV1126B\\",
       "public_pane_numbers": {
-        "18": 1,
+        "20": 3,
         "19": 2,
-        "20": 3
+        "18": 1
       },
       "next_public_pane_number": 6,
       "public_tab_numbers": [
@@ -455,6 +455,10 @@
             }
           },
           "panes": {
+            "20": {
+              "cwd": "E:\\project_kztek\\SDK_RV1126B\\",
+              "label": "debug"
+            },
             "19": {
               "cwd": "E:\\project_kztek\\SDK_RV1126B\\",
               "label": "reviewer",
@@ -474,10 +478,6 @@
                 "kind": "id",
                 "value": "dad086fd-0f24-43b5-b6f5-bf69aa70dec9"
               }
-            },
-            "20": {
-              "cwd": "E:\\project_kztek\\SDK_RV1126B\\",
-              "label": "debug"
             }
           },
           "zoomed": false,
@@ -536,10 +536,6 @@
                 "value": "ca722a98-acaa-4c09-b779-eff47307434d"
               }
             },
-            "23": {
-              "cwd": "E:\\project_kztek\\SSC37X_CAM\\",
-              "label": "debug"
-            },
             "21": {
               "cwd": "E:\\project_kztek\\SSC37X_CAM\\",
               "label": "builder",
@@ -549,6 +545,10 @@
                 "kind": "id",
                 "value": "25caf2b9-59e1-4ac2-9afb-cdedf3bea24c"
               }
+            },
+            "23": {
+              "cwd": "E:\\project_kztek\\SSC37X_CAM\\",
+              "label": "debug"
             }
           },
           "zoomed": false,
@@ -559,8 +559,8 @@
       "active_tab": 0
     }
   ],
-  "active": 0,
-  "selected": 0,
+  "active": 7,
+  "selected": 7,
   "sidebar_width": null,
   "sidebar_section_split": null,
   "collapsed_space_keys": []

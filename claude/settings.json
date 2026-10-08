@@ -163,5 +163,10 @@
   "statusLine": {
     "type": "command",
     "command": "python \"C:/Users/vanwk/.claude/statusline-model.py\""
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git -C E:/Kztek_Firmwave/herdr-backup push*)"
+    ]
   }
 }
