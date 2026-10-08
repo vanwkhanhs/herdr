@@ -160,3 +160,22 @@ sua va tang `revision` len 1, nen Orca khong coi ban ghi la hong.
 Tu khi `orca-layout.ps1` dong bang `--worktree --all`, van de nay **da duoc sua
 tan goc** - khong con sinh ban ghi thua nua. Script duoi day chi con dung de don
 tan du cu, hoac khi can kiem tra.
+
+## Chi dan rieng cho pane reviewer
+
+Pane `reviewer` duoc khoi dong kem `--append-system-prompt-file reviewer-prompt.md`,
+nen no biet vai tro cua minh ngay tu dau: review doc lap, mac dinh chi doc va nhan
+xet, va dung dung cong cu - agent `fw-reviewer` cho mot luot review day du, skill
+`arm-cortex-expert` va `embedded-systems` khi can chieu sau ve chip.
+
+Sua noi dung: `reviewer-prompt.md`. Khong can dung lai script.
+
+Hai ly do khong lam cach khac:
+
+- **Khong dat vao `CLAUDE.md` cua project**: builder dung chung thu muc nen se bi
+  coi la reviewer luon.
+- **Dung dang `-file`, khong dung `--append-system-prompt "<text>"`**: noi dung nam
+  trong file nen lenh khoi dong van ngan. Orca go lai lenh do moi khi khoi dong lai
+  va chuoi dai bi cat cut.
+
+Builder khong nhan chi dan nay.

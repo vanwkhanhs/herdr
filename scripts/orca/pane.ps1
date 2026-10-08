@@ -55,12 +55,28 @@ if (-not $PermissionMode) {
     $PermissionMode = $DefaultMode[$Role]
     if (-not $PermissionMode) { $PermissionMode = 'auto' }
 }
-$mode = @('--permission-mode', $PermissionMode)
+$claudeArgs = @('--permission-mode', $PermissionMode)
+
+# ---- Chi dan rieng cho vai tro reviewer ----
+# Dung --append-system-prompt-file chu khong phai --append-system-prompt: noi dung
+# nam trong file nen lenh van ngan (Orca go lai lenh khoi dong khi khoi dong lai,
+# chuoi dai bi cat cut), va sua noi dung chi o mot cho.
+#
+# Khong dat chi dan nay vao CLAUDE.md cua project vi builder dung chung thu muc -
+# lam vay thi builder cung bi coi la reviewer.
+if ($Role -eq 'reviewer') {
+    $promptFile = Join-Path $PSScriptRoot 'reviewer-prompt.md'
+    if (Test-Path -LiteralPath $promptFile) {
+        $claudeArgs += @('--append-system-prompt-file', $promptFile)
+    } else {
+        Write-Host "Khong thay reviewer-prompt.md - bo qua chi dan vai tro." -ForegroundColor Yellow
+    }
+}
 
 if ($SessionId) {
-    claude @mode --resume $SessionId
+    claude @claudeArgs --resume $SessionId
     if ($LASTEXITCODE -eq 0) { return }
     Write-Host "Khong resume duoc phien $SessionId - mo phien khac." -ForegroundColor Yellow
 }
 
-if ($Role -eq 'builder') { claude @mode --continue } else { claude @mode }
+if ($Role -eq 'builder') { claude @claudeArgs --continue } else { claude @claudeArgs }
