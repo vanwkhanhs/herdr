@@ -76,6 +76,19 @@ Dang ky chay luc dang nhap: `scripts\orca\install-watcher.ps1`
 (Scheduled Task `OrcaLayoutWatcher`, tu goi lai sau 1 phut neu chet).
 Log: `%LOCALAPPDATA%\orca-layout-watcher.log`
 
+## Danh sach agent duoi project trong Orca
+
+Orca dung danh sach nay tu **thu muc scrollback** trong
+`%APPDATA%orca	erminal-history<ptyId ma hoa URL>`. Moi terminal bi dong de lai
+mot thu muc va van hien ra nhu agent kem tuoi, nen sau vai lan dung lai layout se
+thay 4-6 agent trong khi chi co 2 dang song.
+
+`orca-layout.ps1` tu xoa cac thu muc **khong gan voi terminal nao dang song**,
+chi trong worktree duoc quan ly, moi lan chay.
+
+Orca giu danh sach trong bo nho va chi nap lai luc khoi dong, nen sau khi don
+phai dong mo lai Orca moi thay.
+
 ## Lich su hoi thoai cua pane
 
 Lay session-id tu Herdr (`herdr pane list`, khop theo `cwd` + nhan pane), dem ra

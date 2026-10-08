@@ -294,5 +294,35 @@ foreach ($p in $targets) {
     $built++
 }
 
+# ---- Don lich su terminal da chet ----
+# Moi terminal bi dong de lai mot thu muc scrollback trong
+# %APPDATA%\orca\terminal-history\<ptyId ma hoa URL>. Orca liet ke chung duoi
+# project nhu agent kem tuoi, nen sau vai lan dung lai layout nguoi dung thay
+# 4-6 agent trong khi chi co 2 dang song. Moi lan Orca khoi dong lai lai cong
+# them mot bo - don tay mot lan khong giai quyet duoc.
+#
+# Chi xoa thu muc cua worktree duoc quan ly va KHONG gan voi terminal nao dang
+# song. Project khac khong bi dung toi.
+if (-not $DryRun) {
+    $histRoot = Join-Path $env:APPDATA 'orca\terminal-history'
+    if (Test-Path -LiteralPath $histRoot) {
+        $after = Invoke-Orca @('terminal','list','--json')
+        if ($after) {
+            $livePty = @($after.result.terminals | ForEach-Object { $_.ptyId })
+            $dead = 0
+            foreach ($dir in (Get-ChildItem -LiteralPath $histRoot -Directory -ErrorAction SilentlyContinue)) {
+                if ($dir.Name -eq '.pending-delete') { continue }
+                $decoded = [System.Uri]::UnescapeDataString($dir.Name)
+                if ($livePty -contains $decoded) { continue }
+                if (-not ($managed | Where-Object { $decoded -like "*$_*" })) { continue }
+                try { Remove-Item -LiteralPath $dir.FullName -Recurse -Force -ErrorAction Stop; $dead++ } catch { }
+            }
+            if ($dead -gt 0) {
+                Write-Host ("  don     {0} thu muc lich su terminal da chet" -f $dead) -ForegroundColor Yellow
+            }
+        }
+    }
+}
+
 Write-Host ""
 Write-Host ("Dung moi: {0}  |  bo qua: {1}  |  that bai: {2}" -f $built, $skipped, $failed) -ForegroundColor Cyan
