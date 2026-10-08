@@ -13,5 +13,5 @@ session-snapshots/
 id_*
 *.pem
 
-# Dem session-id cua Herdr - trang thai may, khong phai cau hinh
-scripts/orca/herdr-sessions.json
+# Dem session-id cua Herdr: CO Y theo doi trong git.
+# Khi tam tat Herdr, day la nguon duy nhat de Orca resume dung phien.
