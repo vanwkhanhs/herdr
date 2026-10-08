@@ -51,6 +51,16 @@ Orca hien title song cua tien trinh, nen `orca terminal rename` chi doi duoc ten
 **tab**. Ten tung pane do `pane.ps1` dat:
 `$host.UI.RawUI.WindowTitle` kem `CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1`.
 
+## Orca - tu dong terminal mo coi
+
+Khi Orca khoi dong lai, tab tren giao dien mat nhung PTY van song. Orca bao
+chung `orphaned=true`, `title=null`, va van gan `agentIdentity=claude` - nguoi
+dung thay chung hien ra nhu **agent thua** duoi project.
+
+`orca-layout.ps1` tu dong chung moi lan chay, **chi trong worktree cua cac
+project duoc quan ly**. Project khac - nhat la pane dang ngoi lam viec - khong
+bi dung toi.
+
 ## Orca - watcher tu dung layout
 
 **File:** `scripts\orca\orca-layout-watcher.ps1` (tham so dau file).

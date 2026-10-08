@@ -187,6 +187,27 @@ $listed = Invoke-Orca @('terminal','list','--json')
 if ($null -eq $listed) { throw "Khong doc duoc danh sach terminal - Orca da chay chua?" }
 $all = @($listed.result.terminals)
 
+# ---- Dong terminal mo coi ----
+# Khi Orca khoi dong lai, tab tren giao dien mat nhung PTY van song: Orca bao
+# chung voi orphaned=true, title=null, va van gan agentIdentity=claude. Nguoi
+# dung thay chung hien ra nhu agent thua duoi project (da gap: smart_lock 6 xac,
+# 4 trong do mang agent). Chung khong co tab nen khong dung duoc vao viec gi.
+#
+# Chi dong xac trong worktree cua cac project duoc quan ly - khong dung toi
+# project khac, nhat la pane nguoi dung dang ngoi lam viec.
+$managed = @($Projects | ForEach-Object { $_.Path })
+$orphans = @($all | Where-Object { $_.orphaned -and ($managed -contains $_.worktreePath) })
+
+if ($orphans.Count -gt 0) {
+    if ($DryRun) {
+        Write-Host ("  [thu]    se dong {0} terminal mo coi" -f $orphans.Count) -ForegroundColor Yellow
+    } else {
+        foreach ($t in $orphans) { Invoke-Orca @('terminal','close','--terminal',$t.handle,'--json') | Out-Null }
+        Write-Host ("  don     {0} terminal mo coi (xac PTY sau khi Orca khoi dong lai)" -f $orphans.Count) -ForegroundColor Yellow
+        $all = @($all | Where-Object { -not $_.orphaned })
+    }
+}
+
 $built = 0; $skipped = 0; $failed = 0
 
 foreach ($p in $targets) {
