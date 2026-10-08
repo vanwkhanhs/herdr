@@ -69,8 +69,7 @@ bi dung toi.
 |---|---|---|
 | `PollSeconds` | 5 | nhip kiem tra Orca da chay chua |
 | `SettleSeconds` | 12 | cho sau khi runtime ready moi dung layout |
-| `PruneAfterSeconds` | 60 | nhip giua cac luot `-Prune` don pane khoi phuc muon |
-| `PruneAttempts` | 6 | so luot don (6 x 60s = cua so 6 phut sau khi mo Orca) |
+| nhip don | 10,10,15,15,30,30,60,60,120,120 giay | don tai moc 10s..470s sau khi dung layout (10 luot, ~8 phut) |
 
 Watcher nhan dien lan mo moi bang **runtimeId** cua Orca (`orca status --json`),
 khong phai bang "co thay Orca tat khong" - no poll 5 giay mot lan nen dong mo

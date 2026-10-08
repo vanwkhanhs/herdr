@@ -32,7 +32,7 @@
 param(
     [int]$PollSeconds       = 5,
     [int]$SettleSeconds     = 12,
-    [int]$PruneAfterSeconds = 60,
+    [int]$PruneAfterSeconds = 60,   # giu lai cho tuong thich, nhip that nam o $schedule
     [int]$PruneAttempts     = 6
 )
 
@@ -119,9 +119,14 @@ while ($true) {
         #
         # Nen don lap lai trong mot cua so thoi gian. Het cua so thi dung han:
         # sau do terminal moi trong project la do nguoi dung tu mo, khong duoc dong.
-        for ($k = 1; $k -le $PruneAttempts; $k++) {
-            Write-Log "cho ${PruneAfterSeconds}s roi don (luot $k/$PruneAttempts)"
-            Start-Sleep -Seconds $PruneAfterSeconds
+        # Nhip thua dan: dot khoi phuc cua Orca den som va day nhat trong phut dau,
+        # nen don day o do roi gian ra. Cho 60s moi don lan dau la qua lau -
+        # nguoi dung kip nhin thay tab cu hien ra.
+        $schedule = @(10, 10, 15, 15, 30, 30, 60, 60, 120, 120)
+        for ($k = 0; $k -lt $schedule.Count; $k++) {
+            $wait = $schedule[$k]
+            Write-Log ("cho {0}s roi don (luot {1}/{2})" -f $wait, ($k + 1), $schedule.Count)
+            Start-Sleep -Seconds $wait
 
             if (-not (Get-Process -Name orca -ErrorAction SilentlyContinue)) {
                 Write-Log "Orca da tat - bo cac luot don con lai"
