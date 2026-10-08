@@ -121,3 +121,29 @@ phai), tu pane thu ba tach ngang (xuong duoi).
 
 Kiem tra lanh/hong va luot `-Prune` deu bam theo `Roles` cua chinh project do,
 nen project hai pane khong bi coi la thieu pane.
+
+## Don ban ghi "sleeping agent session" thua
+
+Moi lan dung lai layout, Orca ghi them mot cap ban ghi resume theo pane-key moi
+va giu lai cap cu. Duoi moi project se hien **4 agent** trong khi chi co 2 dang
+chay - hai cai kia tro ve **dung hai hoi thoai do**, chi la ban ghi resume thua.
+Con so dung yen o 4, khong phinh them.
+
+Muon ve dung 2:
+
+```powershell
+# tat han Orca truoc
+.\clean-sleeping-sessions.ps1
+# mo lai Orca
+```
+
+Script tu kiem tra Orca da tat chua, tu sao luu CSDL, va chi dong den worktree
+cua cac project liet ke trong `orca-layout.ps1` (doc truc tiep tu file do).
+Worktree khac - vi du `herdr-backup` - giu nguyen de van tu resume duoc.
+
+`content_hash` trong bang la **sha256 hex cua payload**, script tinh lai sau khi
+sua va tang `revision` len 1, nen Orca khong coi ban ghi la hong.
+
+Day la **don mot lan**: sau lan mo Orca ke tiep con so lai thanh 4, vi moi lan
+dung layout deu de lai mot cap. Khong co cach sua tan goc - Orca khong co tuy
+chon tat khoi phuc tab hay tat ghi ban ghi resume (da ra het 207 setting).
