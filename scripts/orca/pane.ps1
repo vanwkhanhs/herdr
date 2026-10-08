@@ -40,10 +40,20 @@ $host.UI.RawUI.WindowTitle = $Role
 
 if ($Role -eq 'debug') { return }
 
-# Che do quyen di theo phien duoc resume chu khong theo settings.json, nen phien
-# cu tao o che do bypass se keo bypass sang day. Ep tuong minh de khong thua ke.
+# ---- Che do quyen mac dinh cho tung vai tro ----
+# DOI O DAY neu muon pane khoi dong o che do khac. Gia tri hop le:
+# acceptEdits | auto | bypassPermissions | manual | dontAsk | plan
+#
+# Phai ep tuong minh: che do quyen di theo phien duoc resume chu khong theo
+# settings.json, nen phien cu tao o bypass se keo bypass sang day.
+$DefaultMode = @{
+    builder  = 'auto'
+    reviewer = 'auto'
+}
+
 if (-not $PermissionMode) {
-    $PermissionMode = if ($Role -eq 'builder') { 'auto' } else { 'manual' }
+    $PermissionMode = $DefaultMode[$Role]
+    if (-not $PermissionMode) { $PermissionMode = 'auto' }
 }
 $mode = @('--permission-mode', $PermissionMode)
 
