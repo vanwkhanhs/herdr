@@ -36,8 +36,14 @@ if ($Uninstall) {
 
 if (-not (Test-Path -LiteralPath $Watcher)) { throw "Khong thay watcher: $Watcher" }
 
-$action = New-ScheduledTaskAction -Execute 'powershell.exe' `
-    -Argument ('-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "{0}"' -f $Watcher)
+# Goi qua wscript + watcher-hidden.vbs chu KHONG goi thang powershell.exe:
+# 'powershell -WindowStyle Hidden' van hien mot cua so console luc dang nhap khi
+# Windows Terminal la terminal mac dinh (no bo qua -WindowStyle). Da gap that -
+# cua so 'Administrator: ...powershell.exe' bat luc khoi dong va khong tu tat.
+$Shim = Join-Path $PSScriptRoot 'watcher-hidden.vbs'
+if (-not (Test-Path -LiteralPath $Shim)) { throw "Khong thay shim: $Shim" }
+
+$action = New-ScheduledTaskAction -Execute 'wscript.exe' -Argument ('"{0}"' -f $Shim)
 
 $trigger = New-ScheduledTaskTrigger -AtLogOn -User "$env:USERDOMAIN\$env:USERNAME"
 
