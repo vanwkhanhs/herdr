@@ -122,6 +122,19 @@ phai), tu pane thu ba tach ngang (xuong duoi).
 Kiem tra lanh/hong va luot `-Prune` deu bam theo `Roles` cua chinh project do,
 nen project hai pane khong bi coi la thieu pane.
 
+## Vi sao phai dong bang --worktree --all
+
+`orca-layout.ps1` dong terminal bang `terminal close --worktree <path> --all`,
+**khong** dong tung pane bang `--terminal`.
+
+Dong tung pane de lai mot "resume record" cho moi pane co agent, nen moi lan dung
+lai layout Orca cong them mot cap va duoi project hien **4 agent** trong khi chi
+co 2 dang chay. Tai lieu cua `--all` ghi ro: *"durably removes its terminal tabs,
+layouts, and resume records"*.
+
+Da do: KzFlashTool 4 -> 2 ngay sau khi dong kieu nay, dung lai van giu 2. Ap cho
+ca 5 project thi tat ca ve dung 2.
+
 ## Don ban ghi "sleeping agent session" thua
 
 Moi lan dung lai layout, Orca ghi them mot cap ban ghi resume theo pane-key moi
@@ -144,6 +157,6 @@ Worktree khac - vi du `herdr-backup` - giu nguyen de van tu resume duoc.
 `content_hash` trong bang la **sha256 hex cua payload**, script tinh lai sau khi
 sua va tang `revision` len 1, nen Orca khong coi ban ghi la hong.
 
-Day la **don mot lan**: sau lan mo Orca ke tiep con so lai thanh 4, vi moi lan
-dung layout deu de lai mot cap. Khong co cach sua tan goc - Orca khong co tuy
-chon tat khoi phuc tab hay tat ghi ban ghi resume (da ra het 207 setting).
+Tu khi `orca-layout.ps1` dong bang `--worktree --all`, van de nay **da duoc sua
+tan goc** - khong con sinh ban ghi thua nua. Script duoi day chi con dung de don
+tan du cu, hoac khi can kiem tra.

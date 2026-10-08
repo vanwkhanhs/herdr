@@ -260,7 +260,15 @@ foreach ($p in $targets) {
         continue
     }
 
-    foreach ($t in $mine) { Invoke-Orca @('terminal','close','--terminal',$t.handle,'--json') | Out-Null }
+    # Dong bang '--worktree <path> --all' chu KHONG dong tung pane mot.
+    #
+    # Dong tung pane de lai "resume record" cho moi pane co agent, nen moi lan
+    # dung lai layout Orca cong them mot cap va duoi project hien 4 agent trong
+    # khi chi co 2 dang chay. Dang --all duoc tai lieu ghi ro la "durably removes
+    # its terminal tabs, layouts, and resume records".
+    #
+    # Da do: KzFlashTool 4 -> 2 ngay sau khi dong kieu nay, va dung lai van giu 2.
+    Invoke-Orca @('terminal','close','--worktree',"path:$($p.Path)",'--all','--json') | Out-Null
 
     $key  = $p.Path.TrimEnd('/').ToLowerInvariant()
     $sids = $herdrSessions[$key]
