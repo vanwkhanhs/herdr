@@ -41,6 +41,8 @@ $Items = [ordered]@{
     'claude\hooks\herdr-agent-state.ps1'  = (Join-Path $ClaudeDir 'hooks\herdr-agent-state.ps1')
     'claude\skills\herdr\SKILL.md'        = (Join-Path $ClaudeDir 'skills\herdr\SKILL.md')
     'claude\statusline-usage.py'          = (Join-Path $ClaudeDir 'statusline-usage.py')
+    'claude\statusline-model.py'          = (Join-Path $ClaudeDir 'statusline-model.py')
+    'claude\CLAUDE.manager.md'            = 'E:\Kztek_Firmwave\CLAUDE.md'
 }
 
 if ($IncludeSession) {
@@ -100,3 +102,4 @@ Write-Host "     - may nay: $ClaudeDir"
 Write-Host "  2. herdr server reload-config    # neu server dang chay"
 Write-Host "  3. herdr                         # mo lai session"
 Write-Host "  4. herdr workspace list          # xac nhan so space"
+Write-Host "  5. .\scripts\orca\install-watcher.ps1   # bat lai watcher dung layout Orca"

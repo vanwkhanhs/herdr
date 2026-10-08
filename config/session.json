@@ -6,7 +6,7 @@
       "custom_name": "Manager",
       "identity_cwd": "E:\\Kztek_Firmwave\\",
       "public_pane_numbers": {
-        "22": 1
+        "1": 1
       },
       "next_public_pane_number": 2,
       "public_tab_numbers": [
@@ -17,10 +17,10 @@
         {
           "custom_name": null,
           "layout": {
-            "Pane": 22
+            "Pane": 1
           },
           "panes": {
-            "22": {
+            "1": {
               "cwd": "E:\\Kztek_Firmwave\\",
               "label": "manager",
               "agent_session": {
@@ -32,8 +32,8 @@
             }
           },
           "zoomed": false,
-          "focused": 22,
-          "root_pane": 22
+          "focused": 1,
+          "root_pane": 1
         }
       ],
       "active_tab": 0
@@ -50,15 +50,17 @@
         "is_linked_worktree": false
       },
       "public_pane_numbers": {
-        "20": 4,
-        "2": 2,
-        "1": 1
+        "5": 5,
+        "2": 1,
+        "4": 4,
+        "3": 2
       },
-      "next_public_pane_number": 5,
+      "next_public_pane_number": 6,
       "public_tab_numbers": [
-        1
+        1,
+        2
       ],
-      "next_public_tab_number": 2,
+      "next_public_tab_number": 3,
       "tabs": [
         {
           "custom_name": null,
@@ -67,24 +69,34 @@
               "direction": "Horizontal",
               "ratio": 0.5,
               "first": {
-                "Pane": 1
+                "Pane": 2
               },
               "second": {
                 "Split": {
                   "direction": "Vertical",
                   "ratio": 0.5,
                   "first": {
-                    "Pane": 2
+                    "Pane": 3
                   },
                   "second": {
-                    "Pane": 20
+                    "Pane": 4
                   }
                 }
               }
             }
           },
           "panes": {
-            "1": {
+            "3": {
+              "cwd": "E:\\Kztek_Firmwave\\Access_Control\\KZ_E02.NET\\",
+              "label": "reviewer",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "68bd292b-4360-4796-8d28-11b1b8fb674b"
+              }
+            },
+            "2": {
               "cwd": "E:\\Kztek_Firmwave\\Access_Control\\KZ_E02.NET\\",
               "label": "builder",
               "agent_session": {
@@ -94,24 +106,28 @@
                 "value": "6bd5ee92-d1ba-47d7-886d-21c14c355cd1"
               }
             },
-            "20": {
+            "4": {
               "cwd": "E:\\Kztek_Firmwave\\Access_Control\\KZ_E02.NET\\",
               "label": "debug"
-            },
-            "2": {
-              "cwd": "E:\\Kztek_Firmwave\\Access_Control\\KZ_E02.NET\\",
-              "label": "reviewer",
-              "agent_session": {
-                "source": "herdr:claude",
-                "agent": "claude",
-                "kind": "id",
-                "value": "b887789f-8461-4b95-97c0-5a796739d07e"
-              }
             }
           },
           "zoomed": false,
-          "focused": 1,
-          "root_pane": 1
+          "focused": 2,
+          "root_pane": 2
+        },
+        {
+          "custom_name": null,
+          "layout": {
+            "Pane": 5
+          },
+          "panes": {
+            "5": {
+              "cwd": "E:\\Kztek_Firmwave\\Access_Control\\KZ_E02.NET\\"
+            }
+          },
+          "zoomed": false,
+          "focused": 5,
+          "root_pane": 5
         }
       ],
       "active_tab": 0
@@ -121,9 +137,9 @@
       "custom_name": "E32",
       "identity_cwd": "E:\\Kztek_Firmwave\\Elevator\\kz_e32.net_firmware-dev1\\",
       "public_pane_numbers": {
-        "15": 3,
-        "3": 1,
-        "4": 2
+        "6": 1,
+        "7": 2,
+        "8": 3
       },
       "next_public_pane_number": 4,
       "public_tab_numbers": [
@@ -138,28 +154,28 @@
               "direction": "Horizontal",
               "ratio": 0.5,
               "first": {
-                "Pane": 3
+                "Pane": 6
               },
               "second": {
                 "Split": {
                   "direction": "Vertical",
                   "ratio": 0.5,
                   "first": {
-                    "Pane": 4
+                    "Pane": 7
                   },
                   "second": {
-                    "Pane": 15
+                    "Pane": 8
                   }
                 }
               }
             }
           },
           "panes": {
-            "15": {
+            "8": {
               "cwd": "E:\\Kztek_Firmwave\\Elevator\\kz_e32.net_firmware-dev1\\",
               "label": "debug"
             },
-            "3": {
+            "6": {
               "cwd": "E:\\Kztek_Firmwave\\Elevator\\kz_e32.net_firmware-dev1\\",
               "label": "builder",
               "agent_session": {
@@ -169,20 +185,20 @@
                 "value": "c88ea3f9-ef76-4a11-b661-6cf32e4c6e86"
               }
             },
-            "4": {
+            "7": {
               "cwd": "E:\\Kztek_Firmwave\\Elevator\\kz_e32.net_firmware-dev1\\",
               "label": "reviewer",
               "agent_session": {
                 "source": "herdr:claude",
                 "agent": "claude",
                 "kind": "id",
-                "value": "2507ba22-1f93-44e7-80da-cc95883d87a5"
+                "value": "daa0ce2d-6236-4aaa-800f-8986f25a1812"
               }
             }
           },
           "zoomed": false,
-          "focused": 3,
-          "root_pane": 3
+          "focused": 6,
+          "root_pane": 6
         }
       ],
       "active_tab": 0
@@ -192,151 +208,9 @@
       "custom_name": "E16",
       "identity_cwd": "E:\\Kztek_Firmwave\\Elevator\\kz_e16.net_firmware-dev1\\",
       "public_pane_numbers": {
-        "5": 1,
-        "6": 2,
-        "16": 3
-      },
-      "next_public_pane_number": 4,
-      "public_tab_numbers": [
-        1
-      ],
-      "next_public_tab_number": 2,
-      "tabs": [
-        {
-          "custom_name": null,
-          "layout": {
-            "Split": {
-              "direction": "Horizontal",
-              "ratio": 0.5,
-              "first": {
-                "Pane": 5
-              },
-              "second": {
-                "Split": {
-                  "direction": "Vertical",
-                  "ratio": 0.5,
-                  "first": {
-                    "Pane": 6
-                  },
-                  "second": {
-                    "Pane": 16
-                  }
-                }
-              }
-            }
-          },
-          "panes": {
-            "16": {
-              "cwd": "E:\\Kztek_Firmwave\\Elevator\\kz_e16.net_firmware-dev1\\",
-              "label": "debug"
-            },
-            "5": {
-              "cwd": "E:\\Kztek_Firmwave\\Elevator\\kz_e16.net_firmware-dev1\\",
-              "label": "builder",
-              "agent_session": {
-                "source": "herdr:claude",
-                "agent": "claude",
-                "kind": "id",
-                "value": "df7779c7-5f4f-478a-b1e4-3f858f9b8442"
-              }
-            },
-            "6": {
-              "cwd": "E:\\Kztek_Firmwave\\Elevator\\kz_e16.net_firmware-dev1\\",
-              "label": "reviewer",
-              "agent_session": {
-                "source": "herdr:claude",
-                "agent": "claude",
-                "kind": "id",
-                "value": "e3235b56-2639-4c64-9fc1-1fb276545cc5"
-              }
-            }
-          },
-          "zoomed": false,
-          "focused": 6,
-          "root_pane": 5
-        }
-      ],
-      "active_tab": 0
-    },
-    {
-      "id": "w9",
-      "custom_name": "iLocker 12CH",
-      "identity_cwd": "E:\\Kztek_Firmwave\\iLocker\\board_12ch\\smart_lock_control_12ch\\",
-      "public_pane_numbers": {
-        "7": 1,
-        "17": 3,
-        "8": 2
-      },
-      "next_public_pane_number": 4,
-      "public_tab_numbers": [
-        1
-      ],
-      "next_public_tab_number": 2,
-      "tabs": [
-        {
-          "custom_name": null,
-          "layout": {
-            "Split": {
-              "direction": "Horizontal",
-              "ratio": 0.5,
-              "first": {
-                "Pane": 7
-              },
-              "second": {
-                "Split": {
-                  "direction": "Vertical",
-                  "ratio": 0.5,
-                  "first": {
-                    "Pane": 8
-                  },
-                  "second": {
-                    "Pane": 17
-                  }
-                }
-              }
-            }
-          },
-          "panes": {
-            "7": {
-              "cwd": "E:\\Kztek_Firmwave\\iLocker\\board_12ch\\smart_lock_control_12ch\\",
-              "label": "builder",
-              "agent_session": {
-                "source": "herdr:claude",
-                "agent": "claude",
-                "kind": "id",
-                "value": "36ec59d9-0fe6-4bed-8165-b6172e5a6727"
-              }
-            },
-            "17": {
-              "cwd": "E:\\Kztek_Firmwave\\iLocker\\board_12ch\\smart_lock_control_12ch\\",
-              "label": "debug"
-            },
-            "8": {
-              "cwd": "E:\\Kztek_Firmwave\\iLocker\\board_12ch\\smart_lock_control_12ch\\",
-              "label": "reviewer",
-              "agent_session": {
-                "source": "herdr:claude",
-                "agent": "claude",
-                "kind": "id",
-                "value": "482b73d8-9526-4075-8cc6-58100ab4738e"
-              }
-            }
-          },
-          "zoomed": false,
-          "focused": 8,
-          "root_pane": 7
-        }
-      ],
-      "active_tab": 0
-    },
-    {
-      "id": "wA",
-      "custom_name": "KzFlashTool",
-      "identity_cwd": "E:\\Kztek_Firmwave\\KzFlashTool\\",
-      "public_pane_numbers": {
-        "19": 3,
         "9": 1,
-        "18": 2
+        "11": 3,
+        "10": 2
       },
       "next_public_pane_number": 4,
       "public_tab_numbers": [
@@ -358,10 +232,10 @@
                   "direction": "Vertical",
                   "ratio": 0.5,
                   "first": {
-                    "Pane": 18
+                    "Pane": 10
                   },
                   "second": {
-                    "Pane": 19
+                    "Pane": 11
                   }
                 }
               }
@@ -369,47 +243,47 @@
           },
           "panes": {
             "9": {
-              "cwd": "E:\\Kztek_Firmwave\\KzFlashTool\\",
+              "cwd": "E:\\Kztek_Firmwave\\Elevator\\kz_e16.net_firmware-dev1\\",
               "label": "builder",
               "agent_session": {
                 "source": "herdr:claude",
                 "agent": "claude",
                 "kind": "id",
-                "value": "c057823e-4c0b-4a3f-9e74-a60f789e8d1a"
+                "value": "df7779c7-5f4f-478a-b1e4-3f858f9b8442"
               }
             },
-            "19": {
-              "cwd": "E:\\Kztek_Firmwave\\KzFlashTool\\",
+            "11": {
+              "cwd": "E:\\Kztek_Firmwave\\Elevator\\kz_e16.net_firmware-dev1\\",
               "label": "debug"
             },
-            "18": {
-              "cwd": "E:\\Kztek_Firmwave\\KzFlashTool\\",
+            "10": {
+              "cwd": "E:\\Kztek_Firmwave\\Elevator\\kz_e16.net_firmware-dev1\\",
               "label": "reviewer",
               "agent_session": {
                 "source": "herdr:claude",
                 "agent": "claude",
                 "kind": "id",
-                "value": "5ba4162e-2ca8-459d-80ac-b7a7bae894f0"
+                "value": "875c968b-fbc1-492b-9e6e-5b1ae0c4a08d"
               }
             }
           },
           "zoomed": false,
-          "focused": 18,
+          "focused": 10,
           "root_pane": 9
         }
       ],
       "active_tab": 0
     },
     {
-      "id": "wC",
-      "custom_name": "RV1126B dual cam 5MP",
-      "identity_cwd": "E:\\project_kztek\\SDK_RV1126B\\",
+      "id": "w9",
+      "custom_name": "iLocker 12CH",
+      "identity_cwd": "E:\\Kztek_Firmwave\\iLocker\\board_12ch\\smart_lock_control_12ch\\",
       "public_pane_numbers": {
-        "12": 2,
-        "13": 3,
-        "11": 1
+        "14": 3,
+        "12": 1,
+        "13": 2
       },
-      "next_public_pane_number": 5,
+      "next_public_pane_number": 4,
       "public_tab_numbers": [
         1
       ],
@@ -422,24 +296,176 @@
               "direction": "Horizontal",
               "ratio": 0.5,
               "first": {
-                "Pane": 11
+                "Pane": 12
               },
               "second": {
                 "Split": {
                   "direction": "Vertical",
                   "ratio": 0.5,
                   "first": {
-                    "Pane": 12
+                    "Pane": 13
                   },
                   "second": {
-                    "Pane": 13
+                    "Pane": 14
                   }
                 }
               }
             }
           },
           "panes": {
-            "11": {
+            "14": {
+              "cwd": "E:\\Kztek_Firmwave\\iLocker\\board_12ch\\smart_lock_control_12ch\\",
+              "label": "debug"
+            },
+            "13": {
+              "cwd": "E:\\Kztek_Firmwave\\iLocker\\board_12ch\\smart_lock_control_12ch\\",
+              "label": "reviewer",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "2d5216b9-70a0-4a30-9bd2-05c1d06d54bb"
+              }
+            },
+            "12": {
+              "cwd": "E:\\Kztek_Firmwave\\iLocker\\board_12ch\\smart_lock_control_12ch\\",
+              "label": "builder",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "36ec59d9-0fe6-4bed-8165-b6172e5a6727"
+              }
+            }
+          },
+          "zoomed": false,
+          "focused": 12,
+          "root_pane": 12
+        }
+      ],
+      "active_tab": 0
+    },
+    {
+      "id": "wA",
+      "custom_name": "KzFlashTool",
+      "identity_cwd": "E:\\Kztek_Firmwave\\KzFlashTool\\",
+      "public_pane_numbers": {
+        "17": 3,
+        "15": 1,
+        "16": 2
+      },
+      "next_public_pane_number": 4,
+      "public_tab_numbers": [
+        1
+      ],
+      "next_public_tab_number": 2,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Split": {
+              "direction": "Horizontal",
+              "ratio": 0.5,
+              "first": {
+                "Pane": 15
+              },
+              "second": {
+                "Split": {
+                  "direction": "Vertical",
+                  "ratio": 0.5,
+                  "first": {
+                    "Pane": 16
+                  },
+                  "second": {
+                    "Pane": 17
+                  }
+                }
+              }
+            }
+          },
+          "panes": {
+            "15": {
+              "cwd": "E:\\Kztek_Firmwave\\KzFlashTool\\",
+              "label": "builder",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "c057823e-4c0b-4a3f-9e74-a60f789e8d1a"
+              }
+            },
+            "17": {
+              "cwd": "E:\\Kztek_Firmwave\\KzFlashTool\\",
+              "label": "debug"
+            },
+            "16": {
+              "cwd": "E:\\Kztek_Firmwave\\KzFlashTool\\",
+              "label": "reviewer",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "2f08b849-260a-45b5-a58e-ff09f22e8248"
+              }
+            }
+          },
+          "zoomed": false,
+          "focused": 16,
+          "root_pane": 15
+        }
+      ],
+      "active_tab": 0
+    },
+    {
+      "id": "wC",
+      "custom_name": "RV1126B dual cam 5MP",
+      "identity_cwd": "E:\\project_kztek\\SDK_RV1126B\\",
+      "public_pane_numbers": {
+        "18": 1,
+        "19": 2,
+        "20": 3
+      },
+      "next_public_pane_number": 6,
+      "public_tab_numbers": [
+        1
+      ],
+      "next_public_tab_number": 3,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Split": {
+              "direction": "Horizontal",
+              "ratio": 0.5,
+              "first": {
+                "Pane": 18
+              },
+              "second": {
+                "Split": {
+                  "direction": "Vertical",
+                  "ratio": 0.5,
+                  "first": {
+                    "Pane": 19
+                  },
+                  "second": {
+                    "Pane": 20
+                  }
+                }
+              }
+            }
+          },
+          "panes": {
+            "19": {
+              "cwd": "E:\\project_kztek\\SDK_RV1126B\\",
+              "label": "reviewer",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "c20b4919-430d-45df-b8af-6e682c09d999"
+              }
+            },
+            "18": {
               "cwd": "E:\\project_kztek\\SDK_RV1126B\\",
               "label": "builder",
               "agent_session": {
@@ -449,24 +475,85 @@
                 "value": "dad086fd-0f24-43b5-b6f5-bf69aa70dec9"
               }
             },
-            "12": {
-              "cwd": "E:\\project_kztek\\SDK_RV1126B\\",
-              "label": "reviewer",
-              "agent_session": {
-                "source": "herdr:claude",
-                "agent": "claude",
-                "kind": "id",
-                "value": "3821e1d4-23ef-458c-9713-ceaa31b289dc"
-              }
-            },
-            "13": {
+            "20": {
               "cwd": "E:\\project_kztek\\SDK_RV1126B\\",
               "label": "debug"
             }
           },
           "zoomed": false,
-          "focused": 11,
-          "root_pane": 11
+          "focused": 19,
+          "root_pane": 18
+        }
+      ],
+      "active_tab": 0
+    },
+    {
+      "id": "wF",
+      "custom_name": "SSC37X_CAM",
+      "identity_cwd": "E:\\project_kztek\\SSC37X_CAM\\",
+      "public_pane_numbers": {
+        "21": 1,
+        "22": 2,
+        "23": 3
+      },
+      "next_public_pane_number": 4,
+      "public_tab_numbers": [
+        1
+      ],
+      "next_public_tab_number": 2,
+      "tabs": [
+        {
+          "custom_name": null,
+          "layout": {
+            "Split": {
+              "direction": "Horizontal",
+              "ratio": 0.5,
+              "first": {
+                "Pane": 21
+              },
+              "second": {
+                "Split": {
+                  "direction": "Vertical",
+                  "ratio": 0.5,
+                  "first": {
+                    "Pane": 22
+                  },
+                  "second": {
+                    "Pane": 23
+                  }
+                }
+              }
+            }
+          },
+          "panes": {
+            "22": {
+              "cwd": "E:\\project_kztek\\SSC37X_CAM\\",
+              "label": "reviewer",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "ca722a98-acaa-4c09-b779-eff47307434d"
+              }
+            },
+            "23": {
+              "cwd": "E:\\project_kztek\\SSC37X_CAM\\",
+              "label": "debug"
+            },
+            "21": {
+              "cwd": "E:\\project_kztek\\SSC37X_CAM\\",
+              "label": "builder",
+              "agent_session": {
+                "source": "herdr:claude",
+                "agent": "claude",
+                "kind": "id",
+                "value": "25caf2b9-59e1-4ac2-9afb-cdedf3bea24c"
+              }
+            }
+          },
+          "zoomed": false,
+          "focused": 22,
+          "root_pane": 21
         }
       ],
       "active_tab": 0

@@ -28,6 +28,7 @@ $Items = [ordered]@{
     (Join-Path $ClaudeDir 'hooks\herdr-agent-state.ps1') = 'claude\hooks\herdr-agent-state.ps1'
     (Join-Path $ClaudeDir 'skills\herdr\SKILL.md')    = 'claude\skills\herdr\SKILL.md'
     (Join-Path $ClaudeDir 'statusline-usage.py')      = 'claude\statusline-usage.py'
+    (Join-Path $ClaudeDir 'statusline-model.py')      = 'claude\statusline-model.py'
     'E:\Kztek_Firmwave\CLAUDE.md'                     = 'claude\CLAUDE.manager.md'
 }
 
