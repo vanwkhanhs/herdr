@@ -29,7 +29,10 @@ param(
     [ValidateSet('builder', 'reviewer', 'debug')]
     [string]$Role,
 
-    [string]$SessionId
+    [string]$SessionId,
+
+    [ValidateSet('acceptEdits', 'auto', 'bypassPermissions', 'manual', 'dontAsk', 'plan')]
+    [string]$PermissionMode
 )
 
 $env:CLAUDE_CODE_DISABLE_TERMINAL_TITLE = '1'
@@ -37,10 +40,17 @@ $host.UI.RawUI.WindowTitle = $Role
 
 if ($Role -eq 'debug') { return }
 
+# Che do quyen di theo phien duoc resume chu khong theo settings.json, nen phien
+# cu tao o che do bypass se keo bypass sang day. Ep tuong minh de khong thua ke.
+if (-not $PermissionMode) {
+    $PermissionMode = if ($Role -eq 'builder') { 'auto' } else { 'manual' }
+}
+$mode = @('--permission-mode', $PermissionMode)
+
 if ($SessionId) {
-    claude --resume $SessionId
+    claude @mode --resume $SessionId
     if ($LASTEXITCODE -eq 0) { return }
     Write-Host "Khong resume duoc phien $SessionId - mo phien khac." -ForegroundColor Yellow
 }
 
-if ($Role -eq 'builder') { claude --continue } else { claude }
+if ($Role -eq 'builder') { claude @mode --continue } else { claude @mode }

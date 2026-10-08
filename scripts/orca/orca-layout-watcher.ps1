@@ -90,7 +90,9 @@ while ($true) {
     Start-Sleep -Seconds $SettleSeconds
 
     try {
-        $out = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $LayoutScript
+        # -WindowStyle Hidden: thieu co nay thi luc dang nhap co mot cua so console
+        # nhay len, in ca loi JSON cua 'herdr pane list' khi Herdr chua chay.
+        $out = & powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File $LayoutScript
         foreach ($l in @($out)) { Write-Log ("  " + $l) }
         Write-Log "dung layout xong"
     } catch {

@@ -12,3 +12,6 @@ session-snapshots/
 *.key
 id_*
 *.pem
+
+# Dem session-id cua Herdr - trang thai may, khong phai cau hinh
+scripts/orca/herdr-sessions.json

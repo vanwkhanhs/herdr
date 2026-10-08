@@ -106,7 +106,10 @@ function Get-HerdrSessions {
     $herdr = (Get-Command herdr -ErrorAction SilentlyContinue)
     if (-not $herdr) { return @{} }
 
-    try { $raw = & $herdr.Source pane list } catch { return @{} }
+    # Herdr chua chay thi lenh nay in loi JSON ra console. Nuot di: day la
+    # truong hop binh thuong (watcher chay truoc khi nguoi dung go 'herdr'),
+    # khong phai loi can hien ra man hinh.
+    try { $raw = & $herdr.Source pane list 2>$null } catch { return @{} }
     if (-not $raw) { return @{} }
 
     try { $parsed = ($raw -join "`n") | ConvertFrom-Json } catch { return @{} }
@@ -125,11 +128,44 @@ function Get-HerdrSessions {
     return $map
 }
 
+# ---- Nho dem session-id ra dia ----
+# Watcher chay ngay khi Orca mo, thuong SOM HON luc nguoi dung go 'herdr'. Luc do
+# Herdr chua chay -> khong lay duoc id -> reviewer mat sach lich su (builder con
+# nho --continue). Da gap that sau lan reset: 5/5 reviewer la phien moi.
+# Session-id cua Herdr on dinh qua cac lan khoi dong lai, nen dem lai dung duoc.
+$SessionCache = Join-Path $PSScriptRoot 'herdr-sessions.json'
+
+function Save-SessionCache {
+    param($Map)
+    try { ($Map | ConvertTo-Json -Depth 5) | Set-Content -LiteralPath $SessionCache -Encoding utf8 } catch { }
+}
+
+function Read-SessionCache {
+    if (-not (Test-Path -LiteralPath $SessionCache)) { return @{} }
+    try { $obj = (Get-Content -LiteralPath $SessionCache -Raw) | ConvertFrom-Json } catch { return @{} }
+    if (-not $obj) { return @{} }
+
+    # ConvertFrom-Json tra PSCustomObject, phai doi nguoc ve hashtable
+    $map = @{}
+    foreach ($entry in $obj.PSObject.Properties) {
+        $inner = @{}
+        foreach ($role in $entry.Value.PSObject.Properties) { $inner[$role.Name] = $role.Value }
+        $map[$entry.Name] = $inner
+    }
+    return $map
+}
+
 $herdrSessions = Get-HerdrSessions
 if ($herdrSessions.Count -gt 0) {
-    Write-Host ("  (lay session-id tu Herdr cho {0} thu muc)" -f $herdrSessions.Count) -ForegroundColor DarkGray
+    Save-SessionCache $herdrSessions
+    Write-Host ("  (session-id tu Herdr dang chay, {0} thu muc - da luu dem)" -f $herdrSessions.Count) -ForegroundColor DarkGray
 } else {
-    Write-Host "  (Herdr khong chay hoac khong co session - dung --continue)" -ForegroundColor DarkGray
+    $herdrSessions = Read-SessionCache
+    if ($herdrSessions.Count -gt 0) {
+        Write-Host ("  (Herdr chua chay - dung dem session-id, {0} thu muc)" -f $herdrSessions.Count) -ForegroundColor DarkGray
+    } else {
+        Write-Host "  (khong co session-id nao - dung --continue / phien moi)" -ForegroundColor DarkGray
+    }
 }
 
 $targets = $Projects
