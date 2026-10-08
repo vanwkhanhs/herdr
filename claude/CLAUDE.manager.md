@@ -112,30 +112,45 @@ Mỗi project = **một tab mang tên project**, chia 3 pane:
 
 Các repo còn lại (`herdr-backup`, `KzUdpTool`, `Fix_old_ver_tu_do`) chỉ có 1 terminal trống.
 
-## Ba chỗ dễ sai
+## Cạm bẫy — ĐỌC TRƯỚC KHI SỬA BẤT CỨ THỨ GÌ VỀ ORCA
+
+Đầy đủ 25 mục kèm triệu chứng và cách đo trong
+`herdr-backup/docs/PITFALLS.md` (nhánh `orca-backup`). **Bắt buộc đọc trước khi
+đụng vào script Orca** — mọi mục trong đó đều đã làm hỏng thật ít nhất một lần.
+
+Bốn cái hay dẫm nhất:
 
 1. **Tên tab ≠ tên pane.** `orca terminal rename --title` đổi tên **cả tab** — một tab chỉ
    có một tên dù chứa 3 pane. Tên từng pane phải do chính tiến trình đặt:
-   `$host.UI.RawUI.WindowTitle='builder'` kèm `CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1`
-   để Claude không ghi đè bằng chủ đề hội thoại. Orca hiển thị title sống của tiến trình,
-   nên `rename` không có tác dụng lên pane.
+   `$host.UI.RawUI.WindowTitle='builder'` kèm `CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1`.
 
-2. **PowerShell 5.1 làm hỏng nháy kép** khi truyền chuỗi sang file exe. Chuỗi lệnh gửi cho
+2. **Đóng terminal phải dùng `--worktree <path> --all`**, không đóng từng pane bằng
+   `--terminal`. Đóng từng pane để lại *resume record*, mỗi lần dựng lại layout cộng
+   thêm một cặp và dưới project hiện 4 agent trong khi chỉ có 2 đang chạy.
+
+3. **PowerShell 5.1 làm hỏng nháy kép** khi truyền chuỗi sang file exe. Chuỗi lệnh gửi cho
    `orca.exe` chỉ dùng nháy đơn (lồng nhau bằng cách nhân đôi).
 
-3. **Git Bash nuốt tham số bắt đầu bằng `/`.** `orca terminal send --text "/exit"` biến
+4. **Git Bash nuốt tham số bắt đầu bằng `/`.** `orca terminal send --text "/exit"` biến
    thành `C:/Program Files/Git/exit`. Phải thêm `MSYS_NO_PATHCONV=1` trước lệnh.
 
-## Tự khôi phục sau khi tắt máy — **không**
+`orca-data.json` là **bản xuất và đứng yên hàng chục phút** — đừng đọc nó để kết luận.
+Kho thật là `profiles\local-default\profile-state.db` (SQLite, dữ liệu nằm trong WAL).
 
-Orca chỉ giữ scrollback terminal (`%APPDATA%\orca\terminal-history\`) và cho resume phiên
-agent **bằng tay** qua AI Vault. Tiến trình Claude chết theo máy.
+## Tự khôi phục sau khi tắt máy — **không**, đã bù bằng watcher
 
-Đã bù bằng Scheduled Task **`OrcaLayoutWatcher`** (chạy lúc đăng nhập): phát hiện Orca vừa
-mở thì dựng lại đủ 3 pane cho 5 project, builder tự `claude --continue`.
+Orca không tự khôi phục agent. Scheduled Task **`OrcaLayoutWatcher`** chạy lúc đăng nhập
+(qua `wscript.exe watcher-hidden.vbs` để không bật cửa sổ console), nhận diện Orca mở
+bằng **`runtimeId`**, rồi:
+
+- đóng terminal mồ côi và dựng lại 5 project
+- builder + reviewer resume đúng session-id **mượn từ Herdr** (đệm ở `herdr-sessions.json`
+  để dùng được cả khi Herdr chưa chạy), cả hai bật `auto mode`
+- dọn 10 lượt nhịp thưa dần trong ~8 phút, bắt tab Orca khôi phục muộn
 
 Script: repo `E:\Kztek_Firmwave\herdr-backup`, nhánh **`orca-backup`**, thư mục
-`scripts\orca\` — xem `README.md` trong đó. Log: `%LOCALAPPDATA%\orca-layout-watcher.log`.
+`scripts\orca\` — xem `README.md` trong đó. Mọi mục cấu hình chỉnh được liệt kê kèm
+đúng file và đúng dòng trong `CONFIG.md`. Log: `%LOCALAPPDATA%\orca-layout-watcher.log`.
 
 Thêm project vào layout: thêm một dòng vào mảng `$Projects` đầu `orca-layout.ps1`,
 `Path` phải trùng chính xác `worktreePath` Orca báo cáo, dùng dấu `/`.
