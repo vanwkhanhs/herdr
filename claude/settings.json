@@ -1,4 +1,9 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(git -C E:/Kztek_Firmwave/herdr-backup push*)"
+    ]
+  },
   "model": "opus[1m]",
   "hooks": {
     "SessionStart": [
@@ -148,8 +153,13 @@
       }
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "python \"C:/Users/vanwk/.claude/statusline-model.py\""
+  },
   "effortLevel": "xhigh",
   "autoUpdatesChannel": "latest",
+  "skipDangerousModePermissionPrompt": true,
   "theme": "dark",
   "modelSettings": {
     "claude-opus-5": {
@@ -158,15 +168,5 @@
     "claude-opus-5-5": {
       "effortLevel": "high"
     }
-  },
-  "skipDangerousModePermissionPrompt": true,
-  "statusLine": {
-    "type": "command",
-    "command": "python \"C:/Users/vanwk/.claude/statusline-model.py\""
-  },
-  "permissions": {
-    "allow": [
-      "Bash(git -C E:/Kztek_Firmwave/herdr-backup push*)"
-    ]
   }
 }

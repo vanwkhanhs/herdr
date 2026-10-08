@@ -54,6 +54,15 @@ def main():
     if name:
         out.append("\033[1;35m" + name + R)
 
+    # Muc effort: low | medium | high | xhigh.
+    # Lay tu effort.level - da xac nhan co trong khoi JSON Claude Code day vao.
+    #
+    # Chi dung ky tu ASCII trong dong nay: stdout cua Python tren Windows khong
+    # xuat UTF-8 qua duong ong nay, dau '.' giua (U+00B7) ra ky tu loi.
+    lv = (data.get("effort") or {}).get("level")
+    if lv:
+        out.append("\033[36m" + lv + R)
+
     ctx = data.get("context_window") or {}
     pct = ctx.get("used_percentage")
     if pct is not None:

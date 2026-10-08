@@ -107,7 +107,8 @@ reviewer mo phien moi.
 
 **File:** `claude\settings.json` (khoa `statusLine`) + `claude\statusline-model.py`
 
-Dang hien: `ten model | ctx <%> <da dung>/<tong>`, mau xanh duoi 60%, vang tu
+Dang hien: `ten model | <effort> | ctx <%> <da dung>/<tong>`
+(effort: low | medium | high | xhigh, lay tu `effort.level`), mau xanh duoi 60%, vang tu
 60%, do tu 85%. Co y **khong** hien han muc 5h/7d va chi phi.
 
 Muon ban day du: doi `statusLine.command` sang `statusline-usage.py` (van giu).
