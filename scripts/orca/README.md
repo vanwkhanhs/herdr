@@ -106,3 +106,18 @@ Watcher vi vay chay hai luot moi lan Orca mo:
 
 Chay tay cung duoc: `.\orca-layout.ps1 -Prune`. Khong co `-Prune` thi khong bao
 gio dong pane thua - de khi can mo them terminal trong project ma khong bi don.
+
+## Project khong can du ba pane
+
+Mac dinh moi project duoc dung `builder` + `reviewer` + `debug`. Project nao chi
+can mot phan thi khai bao `Roles`:
+
+```powershell
+@{ Name = 'herdr-backup'; Path = 'E:/Kztek_Firmwave/herdr-backup'; Roles = @('builder', 'debug') }
+```
+
+Pane dau tien tao tab moi, cac pane sau tach ra: pane thu hai tach doc (sang
+phai), tu pane thu ba tach ngang (xuong duoi).
+
+Kiem tra lanh/hong va luot `-Prune` deu bam theo `Roles` cua chinh project do,
+nen project hai pane khong bi coi la thieu pane.

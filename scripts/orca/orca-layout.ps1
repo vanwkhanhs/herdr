@@ -12,9 +12,13 @@
     hien thi title song cua tien trinh chu khong phai ten dat bang 'terminal rename'.
     Ten tab dat bang 'terminal rename' - mot tab chi co mot ten, dung chung cho ca 3 pane.
 
+    Vai tro theo tung project: mac dinh builder+reviewer+debug. Project chi can
+    hai pane thi khai bao Roles trong $Projects, vd herdr-backup khong can reviewer:
+      @{ Name = ...; Path = ...; Roles = @('builder', 'debug') }
+
     Idempotent. Chi bo qua khi layout THUC SU LANH:
-      - Du ba pane dung ten builder/reviewer/debug VA co agent chay -> bo qua.
-      - Moi truong hop khac -> dong het roi dung lai 3 pane.
+      - Du cac pane dung ten theo Roles VA co agent chay -> bo qua.
+      - Moi truong hop khac -> dong het roi dung lai.
 
     Hai dieu kien, thieu mot la dung lai:
       * Khong xet so pane: sau khi tat may bat lai, Orca khoi phuc dung so tab
@@ -54,9 +58,9 @@ $Projects = @(
     @{ Name = 'smart_lock_control_12ch';  Path = 'E:/Kztek_Firmwave/iLocker/board_12ch/smart_lock_control_12ch' }
     @{ Name = 'KzFlashTool';              Path = 'E:/Kztek_Firmwave/KzFlashTool' }
 
-    # Khong co space tuong ung ben Herdr nen khong co session-id trong dem:
-    # builder lui ve 'claude --continue', reviewer la phien moi.
-    @{ Name = 'herdr-backup';             Path = 'E:/Kztek_Firmwave/herdr-backup' }
+    # Repo cau hinh: khong can reviewer. Cung khong co space tuong ung ben Herdr
+    # nen khong co session-id trong dem - builder lui ve 'claude --continue'.
+    @{ Name = 'herdr-backup';             Path = 'E:/Kztek_Firmwave/herdr-backup'; Roles = @('builder', 'debug') }
 )
 
 # ---- Lenh khoi dong: goi pane.ps1, giu chuoi that ngan.
@@ -197,20 +201,26 @@ foreach ($p in $targets) {
     # khoi phuc hong (lenh khoi dong bi cat cut, ten pane ve '* Claude Code').
     # Da gap that - script bo qua va de nguyen trang thai hong.
     #
-    # Ten pane la bang chung tin cay: chi pane.ps1 moi dat duoc dung ba ten nay
+    # Ten pane la bang chung tin cay: chi pane.ps1 moi dat duoc dung cac ten nay
     # (WindowTitle + CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1). Khoi phuc hong thi
     # ten se khac.
+    #
+    # Vai tro theo tung project: mac dinh du ba, nhung project chi can hai thi
+    # khai bao Roles trong $Projects (vd herdr-backup khong can reviewer).
+    $roles = if ($p.Roles) { @($p.Roles) } else { @('builder', 'reviewer', 'debug') }
+
     $live   = @($mine | Where-Object { $_.agentIdentity })
     $titles = @($mine | ForEach-Object { [string]$_.title })
-    $named  = ($titles -contains 'builder') -and ($titles -contains 'reviewer') -and ($titles -contains 'debug')
+    $named  = $true
+    foreach ($r in $roles) { if ($titles -notcontains $r) { $named = $false } }
 
     if ($live.Count -gt 0 -and $named) {
         # Orca khoi phuc pane cu CHAM hon luc watcher dung layout, nen chung hien
         # ra sau va thanh pane thua (da gap 2 lan trong mot lan reset). Lan chay
         # co -Prune se don: pane nao trong worktree nay ma khong mang dung mot
-        # trong ba ten builder/reviewer/debug deu la do khoi phuc muon.
+        # trong cac vai tro cua project deu la do khoi phuc muon.
         if ($Prune) {
-            $extra = @($mine | Where-Object { @('builder','reviewer','debug') -notcontains [string]$_.title })
+            $extra = @($mine | Where-Object { $roles -notcontains [string]$_.title })
             foreach ($t in $extra) { Invoke-Orca @('terminal','close','--terminal',$t.handle,'--json') | Out-Null }
             if ($extra.Count -gt 0) {
                 Write-Host ("  don     {0}  (dong {1} pane khoi phuc muon)" -f $p.Name, $extra.Count) -ForegroundColor Yellow
@@ -225,31 +235,36 @@ foreach ($p in $targets) {
     }
 
     if ($DryRun) {
-        Write-Host ("  [thu]    {0}  (dong {1} terminal trong, dung 3 pane)" -f $p.Name, $mine.Count)
+        Write-Host ("  [thu]    {0}  (dong {1} terminal, dung {2} pane: {3})" -f $p.Name, $mine.Count, $roles.Count, ($roles -join '+'))
         continue
     }
 
     foreach ($t in $mine) { Invoke-Orca @('terminal','close','--terminal',$t.handle,'--json') | Out-Null }
 
-    $key = $p.Path.TrimEnd('/').ToLowerInvariant()
+    $key  = $p.Path.TrimEnd('/').ToLowerInvariant()
     $sids = $herdrSessions[$key]
-    $CmdBuilder  = New-PaneCommand -Role builder  -SessionId $sids.builder
-    $CmdReviewer = New-PaneCommand -Role reviewer -SessionId $sids.reviewer
-    $CmdDebug    = New-PaneCommand -Role debug
+    $tag  = if ($sids.builder -or $sids.reviewer) { 'session tu Herdr' } else { 'khong co session Herdr' }
 
-    $tag = if ($sids.builder -or $sids.reviewer) { 'session tu Herdr' } else { 'khong co session Herdr' }
-
-    $bh = Find-Handle (Invoke-Orca @('terminal','create','--worktree',"path:$($p.Path)",'--title',$p.Name,'--command',$CmdBuilder,'--json'))
+    # Pane dau tien tao tab moi; cac pane sau tach ra tu pane truoc do.
+    # Huong: pane thu hai tach doc (sang phai), tu pane thu ba tach ngang
+    # (xuong duoi) - cho ra builder | reviewer tren, debug duoi reviewer.
+    $first = $roles[0]
+    $bh = Find-Handle (Invoke-Orca @('terminal','create','--worktree',"path:$($p.Path)",'--title',$p.Name,'--command',(New-PaneCommand -Role $first -SessionId $sids.$first),'--json'))
     if (-not $bh) {
-        Write-Warning ("{0}: tao pane builder that bai" -f $p.Name)
+        Write-Warning ("{0}: tao pane {1} that bai" -f $p.Name, $first)
         $failed++; continue
     }
 
-    $rh = Find-Handle (Invoke-Orca @('terminal','split','--terminal',$bh,'--direction','vertical','--command',$CmdReviewer,'--json'))
-    if ($rh) {
-        Find-Handle (Invoke-Orca @('terminal','split','--terminal',$rh,'--direction','horizontal','--command',$CmdDebug,'--json')) | Out-Null
-    } else {
-        Write-Warning ("{0}: tao pane reviewer that bai - tab chi co builder" -f $p.Name)
+    $prev = $bh
+    for ($i = 1; $i -lt $roles.Count; $i++) {
+        $role = $roles[$i]
+        $dir  = if ($i -eq 1) { 'vertical' } else { 'horizontal' }
+        $h = Find-Handle (Invoke-Orca @('terminal','split','--terminal',$prev,'--direction',$dir,'--command',(New-PaneCommand -Role $role -SessionId $sids.$role),'--json'))
+        if (-not $h) {
+            Write-Warning ("{0}: tao pane {1} that bai - tab thieu pane" -f $p.Name, $role)
+            break
+        }
+        $prev = $h
     }
 
     Invoke-Orca @('terminal','rename','--terminal',$bh,'--title',$p.Name,'--json') | Out-Null
