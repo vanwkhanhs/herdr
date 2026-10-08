@@ -72,6 +72,10 @@ bi dung toi.
 | `PruneAfterSeconds` | 60 | nhip giua cac luot `-Prune` don pane khoi phuc muon |
 | `PruneAttempts` | 6 | so luot don (6 x 60s = cua so 6 phut sau khi mo Orca) |
 
+Watcher nhan dien lan mo moi bang **runtimeId** cua Orca (`orca status --json`),
+khong phai bang "co thay Orca tat khong" - no poll 5 giay mot lan nen dong mo
+nhanh la khong bao gio thay khoang trong.
+
 Dang ky chay luc dang nhap: `scripts\orca\install-watcher.ps1`
 (Scheduled Task `OrcaLayoutWatcher`, tu goi lai sau 1 phut neu chet).
 Log: `%LOCALAPPDATA%\orca-layout-watcher.log`

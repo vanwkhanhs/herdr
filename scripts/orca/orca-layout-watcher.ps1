@@ -6,9 +6,14 @@
     Orca khong tu khoi dong cung Windows va khong co hook luc mo app, nen cach
     duy nhat de "tu chay luc mo Orca" la mot watcher nhe chay nen:
 
-      - Khong co tien trinh orca  -> reset co, cho tiep (khong lam Orca khoi dong).
-      - Orca vua len, runtime ready -> cho vai giay cho worktree nap xong,
-        goi orca-layout.ps1 dung mot lan, roi dung co lai den khi Orca tat.
+      - Khong co tien trinh orca -> cho tiep (khong lam Orca khoi dong).
+      - Thay runtimeId KHAC lan truoc -> day la lan mo moi: cho vai giay cho
+        worktree nap xong roi goi orca-layout.ps1, sau do don vai luot.
+
+    Nhan dien lan mo moi bang runtimeId chu khong bang "co thay Orca tat khong":
+    watcher poll 5 giay mot lan, nguoi dung dong roi mo lai Orca nhanh hon the
+    nen khong bao gio thay khoang trong. Da hong that - 4/5 project mat sach pane
+    ma watcher van tuong dang la phien cu.
 
     Tieu thu gan nhu bang khong: moi $PollSeconds chi goi Get-Process mot lan,
     chi khi thay Orca song moi hoi 'orca status'.
@@ -55,30 +60,31 @@ if (-not $Orca) { throw "Khong tim thay orca CLI." }
 
 Write-Log "watcher bat dau (poll=${PollSeconds}s settle=${SettleSeconds}s)"
 
-$appliedForThisLaunch = $false
+$lastRuntimeId = $null
 
 while ($true) {
 
     $proc = Get-Process -Name orca -ErrorAction SilentlyContinue
 
     if (-not $proc) {
-        if ($appliedForThisLaunch) { Write-Log "Orca da tat - cho lan mo sau" }
-        $appliedForThisLaunch = $false
+        if ($lastRuntimeId) { Write-Log "Orca da tat - cho lan mo sau" }
+        $lastRuntimeId = $null
         Start-Sleep -Seconds $PollSeconds
         continue
     }
 
-    if ($appliedForThisLaunch) {
-        Start-Sleep -Seconds $PollSeconds
-        continue
-    }
-
-    # Orca dang chay va chua dung layout cho lan mo nay
+    # Nhan dien lan mo moi bang runtimeId chu KHONG bang "co thay Orca tat khong".
+    # Cach cu hong that: watcher poll 5 giay mot lan, nguoi dung dong roi mo lai
+    # Orca nhanh hon the nen watcher khong bao gio thay khoang trong, tuong van la
+    # phien cu va khong dung lai layout. Hau qua: 4/5 project mat sach pane va
+    # khong duoc dung lai cho den khi co nguoi chay tay.
     $ready = $false
+    $runtimeId = $null
     try {
         $raw = & $Orca status --json
         $s = ($raw -join "`n") | ConvertFrom-Json
         $ready = ($s.result.runtime.state -eq 'ready') -and ($s.result.app.running -eq $true)
+        $runtimeId = $s.result.runtime.runtimeId
     } catch {
         $ready = $false
     }
@@ -87,6 +93,14 @@ while ($true) {
         Start-Sleep -Seconds $PollSeconds
         continue
     }
+
+    if ($runtimeId -and $runtimeId -eq $lastRuntimeId) {
+        Start-Sleep -Seconds $PollSeconds
+        continue
+    }
+
+    if ($lastRuntimeId) { Write-Log "Orca co runtime moi ($runtimeId) - dung lai layout" }
+    $lastRuntimeId = $runtimeId
 
     Write-Log "Orca ready - cho ${SettleSeconds}s roi dung layout"
     Start-Sleep -Seconds $SettleSeconds
@@ -122,6 +136,6 @@ while ($true) {
         Write-Log ("LOI khi dung layout: " + $_.Exception.Message)
     }
 
-    $appliedForThisLaunch = $true
+    # runtimeId da duoc ghi nhan o tren - khong can co rieng nua
     Start-Sleep -Seconds $PollSeconds
 }
