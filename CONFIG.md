@@ -69,7 +69,8 @@ bi dung toi.
 |---|---|---|
 | `PollSeconds` | 5 | nhip kiem tra Orca da chay chua |
 | `SettleSeconds` | 12 | cho sau khi runtime ready moi dung layout |
-| `PruneAfterSeconds` | 60 | cho roi chay luot `-Prune` don pane khoi phuc muon |
+| `PruneAfterSeconds` | 60 | nhip giua cac luot `-Prune` don pane khoi phuc muon |
+| `PruneAttempts` | 6 | so luot don (6 x 60s = cua so 6 phut sau khi mo Orca) |
 
 Dang ky chay luc dang nhap: `scripts\orca\install-watcher.ps1`
 (Scheduled Task `OrcaLayoutWatcher`, tu goi lai sau 1 phut neu chet).
