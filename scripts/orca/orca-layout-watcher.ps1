@@ -25,8 +25,9 @@
 
 [CmdletBinding()]
 param(
-    [int]$PollSeconds   = 5,
-    [int]$SettleSeconds = 12
+    [int]$PollSeconds       = 5,
+    [int]$SettleSeconds     = 12,
+    [int]$PruneAfterSeconds = 60
 )
 
 $ErrorActionPreference = 'Continue'
@@ -95,6 +96,15 @@ while ($true) {
         $out = & powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File $LayoutScript
         foreach ($l in @($out)) { Write-Log ("  " + $l) }
         Write-Log "dung layout xong"
+
+        # Luot don. Orca khoi phuc mot so tab CHAM hon luc dung layout, nen chung
+        # hien ra sau va thanh pane thua - da gap 2 lan trong mot lan reset.
+        # Cho $PruneAfterSeconds roi chay lai voi -Prune de dong chung.
+        Write-Log "cho ${PruneAfterSeconds}s roi don pane khoi phuc muon"
+        Start-Sleep -Seconds $PruneAfterSeconds
+        $out2 = & powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File $LayoutScript -Prune
+        foreach ($l in @($out2)) { Write-Log ("  " + $l) }
+        Write-Log "don xong"
     } catch {
         Write-Log ("LOI khi dung layout: " + $_.Exception.Message)
     }

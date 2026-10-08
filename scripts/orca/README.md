@@ -92,3 +92,17 @@ Ten pane la bang chung tin cay vi chi `pane.ps1` moi dat duoc dung ba ten do.
 
 Che do quyen (`auto mode` / `bypass permissions`) di theo phien duoc resume,
 khong phai theo `settings.json`.
+
+## Luot don pane khoi phuc muon
+
+Orca khoi phuc mot so tab **cham hon** luc watcher dung layout, nen chung hien ra
+sau va thanh pane thua - da gap 2 lan chi trong mot lan reset.
+
+Watcher vi vay chay hai luot moi lan Orca mo:
+
+1. Dung layout (ngay khi runtime ready + 12 giay).
+2. Doi 60 giay roi chay lai voi `-Prune`: project nao da lanh thi dong moi pane
+   khong mang dung mot trong ba ten `builder` / `reviewer` / `debug`.
+
+Chay tay cung duoc: `.\orca-layout.ps1 -Prune`. Khong co `-Prune` thi khong bao
+gio dong pane thua - de khi can mo them terminal trong project ma khong bi don.

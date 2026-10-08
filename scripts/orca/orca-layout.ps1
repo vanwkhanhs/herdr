@@ -40,7 +40,8 @@
 [CmdletBinding()]
 param(
     [string]$Project,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$Prune
 )
 
 $ErrorActionPreference = 'Stop'
@@ -200,6 +201,17 @@ foreach ($p in $targets) {
     $named  = ($titles -contains 'builder') -and ($titles -contains 'reviewer') -and ($titles -contains 'debug')
 
     if ($live.Count -gt 0 -and $named) {
+        # Orca khoi phuc pane cu CHAM hon luc watcher dung layout, nen chung hien
+        # ra sau va thanh pane thua (da gap 2 lan trong mot lan reset). Lan chay
+        # co -Prune se don: pane nao trong worktree nay ma khong mang dung mot
+        # trong ba ten builder/reviewer/debug deu la do khoi phuc muon.
+        if ($Prune) {
+            $extra = @($mine | Where-Object { @('builder','reviewer','debug') -notcontains [string]$_.title })
+            foreach ($t in $extra) { Invoke-Orca @('terminal','close','--terminal',$t.handle,'--json') | Out-Null }
+            if ($extra.Count -gt 0) {
+                Write-Host ("  don     {0}  (dong {1} pane khoi phuc muon)" -f $p.Name, $extra.Count) -ForegroundColor Yellow
+            }
+        }
         Write-Host ("  bo qua   {0}  (layout lanh, {1} agent chay)" -f $p.Name, $live.Count) -ForegroundColor DarkGray
         $skipped++; continue
     }
