@@ -41,12 +41,17 @@ $action = New-ScheduledTaskAction -Execute 'powershell.exe' `
 
 $trigger = New-ScheduledTaskTrigger -AtLogOn -User "$env:USERDOMAIN\$env:USERNAME"
 
+# RestartInterval/RestartCount: watcher da tung chet giua chung (LastTaskResult
+# 0xC000013A - bi ket thuc cuong buc), va vi no chet nen sau khi bat may lai
+# khong co layout nao duoc dung. Co nay bao Windows tu goi lai sau 1 phut.
 $settings = New-ScheduledTaskSettingsSet `
     -AllowStartIfOnBatteries `
     -DontStopIfGoingOnBatteries `
     -ExecutionTimeLimit ([TimeSpan]::Zero) `
     -MultipleInstances IgnoreNew `
-    -StartWhenAvailable
+    -StartWhenAvailable `
+    -RestartInterval (New-TimeSpan -Minutes 1) `
+    -RestartCount 999
 
 Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger `
     -Settings $settings -Description 'Dung layout builder/reviewer/debug moi khi Orca duoc mo' -Force | Out-Null
