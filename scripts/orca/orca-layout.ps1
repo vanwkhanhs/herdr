@@ -53,6 +53,10 @@ $Projects = @(
     @{ Name = 'kz_e16.net_firmware-dev1'; Path = 'E:/Kztek_Firmwave/Elevator/kz_e16.net_firmware-dev1' }
     @{ Name = 'smart_lock_control_12ch';  Path = 'E:/Kztek_Firmwave/iLocker/board_12ch/smart_lock_control_12ch' }
     @{ Name = 'KzFlashTool';              Path = 'E:/Kztek_Firmwave/KzFlashTool' }
+
+    # Khong co space tuong ung ben Herdr nen khong co session-id trong dem:
+    # builder lui ve 'claude --continue', reviewer la phien moi.
+    @{ Name = 'herdr-backup';             Path = 'E:/Kztek_Firmwave/herdr-backup' }
 )
 
 # ---- Lenh khoi dong: goi pane.ps1, giu chuoi that ngan.
