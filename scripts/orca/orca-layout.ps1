@@ -49,12 +49,18 @@ $Projects = @(
     @{ Name = 'KzFlashTool';              Path = 'E:/Kztek_Firmwave/KzFlashTool' }
 )
 
-# ---- Lenh khoi dong tung pane.
-# ---- Chi dung nhay don (long nhau bang cach nhan doi). PowerShell 5.1 lam hong
-# ---- nhay kep khi truyen chuoi sang file exe, nen tuyet doi khong dung nhay kep.
-$CmdBuilder  = '$env:CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1; $host.UI.RawUI.WindowTitle=''builder''; claude --continue'
-$CmdReviewer = '$env:CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1; $host.UI.RawUI.WindowTitle=''reviewer''; claude'
-$CmdDebug    = '$host.UI.RawUI.WindowTitle=''debug'''
+# ---- Lenh khoi dong: goi pane.ps1, giu chuoi that ngan.
+# ---- Orca go lai chuoi nay vao shell moi lan khoi dong lai; chuoi dai bi cat
+# ---- giua chung (da gap that). Moi logic nam trong pane.ps1, khong nam o day.
+# ---- Chi dung nhay don - PowerShell 5.1 lam hong nhay kep khi truyen sang exe.
+$PaneScript = Join-Path $PSScriptRoot 'pane.ps1'
+
+function New-PaneCommand {
+    param([string]$Role, [string]$SessionId)
+    $cmd = "& '$PaneScript' -Role $Role"
+    if ($SessionId) { $cmd += " -SessionId $SessionId" }
+    return $cmd
+}
 
 # ---- Tim orca CLI ----
 $Orca = (Get-Command orca -ErrorAction SilentlyContinue).Source
@@ -84,6 +90,41 @@ function Find-Handle {
         if ($v) { return $v }
     }
     return $null
+}
+
+# ---- Lay session-id tung pane tu Herdr ----
+# Herdr luu session-id rieng cho tung pane (builder/reviewer) va tu resume dung
+# phien do sau khi khoi dong lai - do la ly do no hien duoc lich sur ca hai ben.
+# Orca khong co co che nay, nen ta muon id cua Herdr de resume y het.
+# Herdr khong chay thi tra ve bang rong; pane se lui ve --continue / phien moi.
+function Get-HerdrSessions {
+    $herdr = (Get-Command herdr -ErrorAction SilentlyContinue)
+    if (-not $herdr) { return @{} }
+
+    try { $raw = & $herdr.Source pane list } catch { return @{} }
+    if (-not $raw) { return @{} }
+
+    try { $parsed = ($raw -join "`n") | ConvertFrom-Json } catch { return @{} }
+    if (-not $parsed.result.panes) { return @{} }
+
+    $map = @{}
+    foreach ($pane in $parsed.result.panes) {
+        if (-not $pane.agent_session) { continue }
+        if ($pane.label -ne 'builder' -and $pane.label -ne 'reviewer') { continue }
+
+        # Herdr tra cwd dung dau '\', Orca dung '/' - chuan hoa de khop duoc
+        $key = ($pane.cwd -replace '\\', '/').TrimEnd('/').ToLowerInvariant()
+        if (-not $map.ContainsKey($key)) { $map[$key] = @{} }
+        $map[$key][$pane.label] = $pane.agent_session.value
+    }
+    return $map
+}
+
+$herdrSessions = Get-HerdrSessions
+if ($herdrSessions.Count -gt 0) {
+    Write-Host ("  (lay session-id tu Herdr cho {0} thu muc)" -f $herdrSessions.Count) -ForegroundColor DarkGray
+} else {
+    Write-Host "  (Herdr khong chay hoac khong co session - dung --continue)" -ForegroundColor DarkGray
 }
 
 $targets = $Projects
@@ -118,6 +159,14 @@ foreach ($p in $targets) {
 
     foreach ($t in $mine) { Invoke-Orca @('terminal','close','--terminal',$t.handle,'--json') | Out-Null }
 
+    $key = $p.Path.TrimEnd('/').ToLowerInvariant()
+    $sids = $herdrSessions[$key]
+    $CmdBuilder  = New-PaneCommand -Role builder  -SessionId $sids.builder
+    $CmdReviewer = New-PaneCommand -Role reviewer -SessionId $sids.reviewer
+    $CmdDebug    = New-PaneCommand -Role debug
+
+    $tag = if ($sids.builder -or $sids.reviewer) { 'session tu Herdr' } else { 'khong co session Herdr' }
+
     $bh = Find-Handle (Invoke-Orca @('terminal','create','--worktree',"path:$($p.Path)",'--title',$p.Name,'--command',$CmdBuilder,'--json'))
     if (-not $bh) {
         Write-Warning ("{0}: tao pane builder that bai" -f $p.Name)
@@ -133,7 +182,7 @@ foreach ($p in $targets) {
 
     Invoke-Orca @('terminal','rename','--terminal',$bh,'--title',$p.Name,'--json') | Out-Null
 
-    Write-Host ("  OK       {0}" -f $p.Name) -ForegroundColor Green
+    Write-Host ("  OK       {0}  ({1})" -f $p.Name, $tag) -ForegroundColor Green
     $built++
 }
 

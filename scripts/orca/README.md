@@ -1,25 +1,29 @@
 # Tu dung layout Orca
 
-Orca khong tu khoi phuc agent sau khi tat may (khac Herdr, vn co
-`resume_agents_on_restore = true`). Orca chi giu scrollback terminal va cho
-*resume* phien agent **bang tay** qua AI Vault. Bo script nay bu phan con thieu.
+Orca khong tu khoi phuc agent sau khi tat may. Herdr thi co
+(`resume_agents_on_restore = true`): no luu session-id rieng cho tung pane va
+spawn lai Claude dung phien do. Bo script nay bu phan con thieu cho Orca -
+**bang cach muon chinh session-id ma Herdr dang giu**.
 
 ## Layout duoc dung
 
 Moi project = **mot tab mang ten project**, chia 3 pane:
 
-| Pane | Lenh | Vai tro |
+| Pane | Phien Claude | Vai tro |
 |---|---|---|
-| `builder` | `claude --continue` | resume phien gan nhat cua thu muc |
-| `reviewer` | `claude` | phien moi, tach biet voi builder |
-| `debug` | (shell) | PowerShell thuan, chay build/nap/ssh |
+| `builder` | resume session-id cua pane `builder` ben Herdr | viet/sua code |
+| `reviewer` | resume session-id cua pane `reviewer` ben Herdr | review, tach biet voi builder |
+| `debug` | khong co | PowerShell thuan |
+
+Herdr khong chay thi lui ve: builder `claude --continue`, reviewer phien moi.
 
 ## File
 
 | File | Viec |
 |---|---|
-| `orca-layout.ps1` | Dung layout. Idempotent, chay lai khong tao trung. |
-| `orca-layout-watcher.ps1` | Theo doi Orca, moi lan Orca mo len thi dung layout dung mot lan. |
+| `orca-layout.ps1` | Dung layout. Doc session-id tu `herdr pane list`. |
+| `pane.ps1` | Launcher cho tung pane. Dat ten pane, chon resume hay tao moi. |
+| `orca-layout-watcher.ps1` | Theo doi Orca, moi lan Orca mo len dung layout mot lan. |
 | `install-watcher.ps1` | Dang ky watcher thanh Scheduled Task chay khi dang nhap. |
 
 ## Dung
@@ -44,21 +48,38 @@ Them mot dong vao mang `$Projects` dau file `orca-layout.ps1`:
 ```
 
 `Path` phai trung chinh xac `worktreePath` ma Orca bao cao
-(`orca terminal list --json`), dung dau `/`.
+(`orca terminal list --json`), dung dau `/`. Muon co lich su thi project do
+phai co space tuong ung ben Herdr voi pane dat ten `builder` / `reviewer`.
 
-## Hai dieu de sai
+## Nam cho da sai that
 
-1. **Ten tab va ten pane la hai thu khac nhau.**
-   `orca terminal rename` doi ten **ca tab** - mot tab chi co mot ten, du chua
-   3 pane. Ten tung pane phai do chinh tien trinh dat:
-   `$host.UI.RawUI.WindowTitle='builder'` kem `CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1`
-   de Claude khong ghi de bang chu de hoi thoai.
+1. **Lenh khoi dong dai bi Orca cat cut.** Khi khoi dong lai, Orca **go lai**
+   lenh khoi dong vao shell chu khong chay sach. Chuoi dai bi cat giua chung -
+   da gap: `$env:CLAUDE_CODE_DISABLE_TERMINAL_TITL` cut o day, keo theo mat ten
+   pane va chay nham lenh. Vi vay moi logic nam trong `pane.ps1`, lenh Orca luu
+   chi la mot loi goi ngan.
 
-2. **PowerShell 5.1 lam hong nhay kep khi truyen chuoi sang file exe.**
-   Cac bien `$CmdBuilder/$CmdReviewer/$CmdDebug` chi dung nhay don (long nhau
-   bang cach nhan doi). Dung nhay kep ben trong se hong lenh.
+2. **Dung ghim `claude --resume <id>` cung vao lenh khoi dong.** Session-id doi
+   theo thoi gian; lan sau Orca go lai se bao `No conversation found with session
+   ID: ...`. Phai lay id moi tu Herdr o thoi diem dung layout.
+
+3. **Ten tab va ten pane la hai thu khac nhau.** `orca terminal rename` doi ten
+   **ca tab** - mot tab chi co mot ten du chua 3 pane. Ten tung pane phai do
+   chinh tien trinh dat: `$host.UI.RawUI.WindowTitle` kem
+   `CLAUDE_CODE_DISABLE_TERMINAL_TITLE=1` de Claude khong ghi de bang chu de
+   hoi thoai.
+
+4. **PowerShell 5.1 lam hong nhay kep** khi truyen chuoi sang file exe. Chuoi
+   gui cho `orca.exe` chi dung nhay don.
+
+5. **`claude --session-id <uuid>` khong dung lai duoc id cu** - lan hai bao
+   `Session ID ... is already in use.`. Muon noi tiep phai la `--resume`.
 
 ## An toan
 
-Script bo qua project **dang co agent chay** va canh bao, khong dong viec dang lam.
-Chi project con terminal trong moi bi dong de dung lai.
+Quyet dinh theo **co agent hay khong**, khong theo so pane: project dang co agent
+chay thi bo qua, khong dong viec dang lam. Khong xet so pane la co y - sau khi
+tat may bat lai, Orca khoi phuc dung so tab cu nhung do chi la shell trong.
+
+Che do quyen (`auto mode` / `bypass permissions`) di theo phien duoc resume,
+khong phai theo `settings.json`.
