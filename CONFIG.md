@@ -17,6 +17,8 @@ roi `scripts\backup.ps1` + commit.
 | kz_e16.net_firmware-dev1 | `E:/Kztek_Firmwave/Elevator/kz_e16.net_firmware-dev1` | builder, reviewer, debug |
 | smart_lock_control_12ch | `E:/Kztek_Firmwave/iLocker/board_12ch/smart_lock_control_12ch` | builder, reviewer, debug |
 | KzFlashTool | `E:/Kztek_Firmwave/KzFlashTool` | builder, reviewer, debug |
+| RV1126B dual cam 5MP | `E:/project_kztek/SDK_RV1126B` | builder, reviewer, debug |
+| SSC37X_CAM | `E:/project_kztek/SSC37X_CAM` | builder, reviewer, debug |
 
 `herdr-backup` (hien thi la **orca-backup**) **co y khong quan ly** - do la pane
 nguoi dung ngoi lam viec, dua vao danh sach thi watcher se dong no moi lan mo Orca.

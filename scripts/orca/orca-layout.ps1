@@ -58,6 +58,11 @@ $Projects = @(
     @{ Name = 'smart_lock_control_12ch';  Path = 'E:/Kztek_Firmwave/iLocker/board_12ch/smart_lock_control_12ch' }
     @{ Name = 'KzFlashTool';              Path = 'E:/Kztek_Firmwave/KzFlashTool' }
 
+    # Hai thu muc nay von khong phai git repo - da 'git init' de Orca nhan
+    # (orca repo add tu choi thu muc khong phai git). Khong commit gi, chi tao .git.
+    @{ Name = 'RV1126B dual cam 5MP';     Path = 'E:/project_kztek/SDK_RV1126B' }
+    @{ Name = 'SSC37X_CAM';               Path = 'E:/project_kztek/SSC37X_CAM' }
+
     # CO Y KHONG quan ly herdr-backup (hien thi trong Orca la 'orca-backup').
     # Day la pane nguoi dung ngoi lam viec truc tiep; dua vao danh sach thi
     # watcher se dong no va dung lai moi lan mo Orca, cat ngang viec dang lam.
@@ -248,6 +253,18 @@ foreach ($p in $targets) {
             }
         }
         Write-Host ("  bo qua   {0}  (layout lanh, {1} agent chay)" -f $p.Name, $live.Count) -ForegroundColor DarkGray
+        $skipped++; continue
+    }
+
+    # Luot -Prune chi DON, khong bao gio dung lai.
+    #
+    # Luot don dau chay 10 giay sau khi dung layout - luc do pane vua tao con
+    # dang khoi dong, chua kip dat ten. Neu de no dung lai thi no pha dung cai
+    # vua dung xong. Da gap: mot luot prune dung lai 4 project dang lanh.
+    #
+    # Viec dung lai thuoc ve luot dau (khong co -Prune). Project that su hong se
+    # duoc dung lai o lan mo Orca ke tiep.
+    if ($Prune) {
         $skipped++; continue
     }
 
