@@ -58,9 +58,9 @@ $Projects = @(
     @{ Name = 'smart_lock_control_12ch';  Path = 'E:/Kztek_Firmwave/iLocker/board_12ch/smart_lock_control_12ch' }
     @{ Name = 'KzFlashTool';              Path = 'E:/Kztek_Firmwave/KzFlashTool' }
 
-    # Repo cau hinh: khong can reviewer. Cung khong co space tuong ung ben Herdr
-    # nen khong co session-id trong dem - builder lui ve 'claude --continue'.
-    @{ Name = 'herdr-backup';             Path = 'E:/Kztek_Firmwave/herdr-backup'; Roles = @('builder', 'debug') }
+    # CO Y KHONG quan ly herdr-backup (hien thi trong Orca la 'orca-backup').
+    # Day la pane nguoi dung ngoi lam viec truc tiep; dua vao danh sach thi
+    # watcher se dong no va dung lai moi lan mo Orca, cat ngang viec dang lam.
 )
 
 # ---- Lenh khoi dong: goi pane.ps1, giu chuoi that ngan.
