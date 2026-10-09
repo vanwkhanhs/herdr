@@ -199,17 +199,28 @@ while ($true) {
         continue
     }
 
-    # ---- Trong cua so an han: cho ngu tiep, khong dung gi ----
+    # ---- Trong cua so an han: cho ngu cac tab Orca khoi phuc muon ----
+    #
+    # PHAI loai tru project nguoi dung dang mo. Truoc day cho ngu tat ca, ke ca
+    # cai vua bam - nguoi dung mo project nao thi no dong project do, lien tiep
+    # trong suot 45 giay. Day la loi nang nhat cua co che an han.
     if ($graceUntil -and (Get-Date) -lt $graceUntil) {
         try {
+            $activeNow = ''
+            try { $activeNow = ((& node (Join-Path $PSScriptRoot 'get-active-worktree.js')) -join '').Trim() } catch { }
+
             $t = ((& $Orca terminal list --json) -join "`n") | ConvertFrom-Json
             $terms = @($t.result.terminals | Where-Object { -not $_.orphaned })
-            $paths = @($Projects | ForEach-Object { $_.Path })
-            if (@($terms | Where-Object { $paths -contains $_.worktreePath }).Count -gt 0) {
-                Write-Log "con tab khoi phuc muon - cho ngu tiep"
-                Invoke-Layout @('-SleepAll')
+
+            foreach ($p in $Projects) {
+                if ($activeNow -and $p.Path.TrimEnd('/') -eq $activeNow.TrimEnd('/')) { continue }
+                $mine = @($terms | Where-Object { $_.worktreePath -eq $p.Path })
+                if ($mine.Count -eq 0) { continue }
+                Write-Log ("{0}: tab khoi phuc muon - cho ngu" -f $p.Name)
+                Invoke-Layout @('-Project', $p.Name, '-SleepAll')
             }
         } catch { }
+        $lastOrcaKey = $orcaKey
         Start-Sleep -Seconds $PollSeconds
         continue
     }
