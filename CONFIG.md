@@ -121,6 +121,15 @@ Dang hien: `ten model | <effort> | ctx <%> <da dung>/<tong>`
 
 Muon ban day du: doi `statusLine.command` sang `statusline-usage.py` (van giu).
 
+## Giao dien Claude Code: toan man hinh
+
+**File:** `claude\settings.json`, khoa `"tui": "fullscreen"` (bat 09/10/2026).
+
+Che do mac dinh ve noi tiep sau output nen o nhap va thanh trang thai hay troi len
+giua man hinh khi pane doi kich thuoc. Toan man hinh ghim chung o day. Danh doi:
+lich su cuon do Claude tu quan ly, scrollback Orca luu lai it noi dung hon.
+Tat: xoa dong `tui` trong settings.json.
+
 ## Herdr
 
 **File:** `config\config.toml`
