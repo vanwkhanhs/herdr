@@ -32,7 +32,12 @@ param(
     [string]$SessionId,
 
     [ValidateSet('acceptEdits', 'auto', 'bypassPermissions', 'manual', 'dontAsk', 'plan')]
-    [string]$PermissionMode
+    [string]$PermissionMode,
+
+    # Model ep cho pane. DOI O DAY neu muon dung model khac.
+    # Nhan alias ('opus', 'sonnet') hoac ten day du ('claude-opus-5').
+    # 'opus[1m]' la ban Opus 5 cua so ngu canh 1 trieu token.
+    [string]$Model = 'opus[1m]'
 )
 
 $env:CLAUDE_CODE_DISABLE_TERMINAL_TITLE = '1'
@@ -55,7 +60,11 @@ if (-not $PermissionMode) {
     $PermissionMode = $DefaultMode[$Role]
     if (-not $PermissionMode) { $PermissionMode = 'auto' }
 }
-$claudeArgs = @('--permission-mode', $PermissionMode)
+# Phai ep --model y nhu --permission-mode: phien duoc resume mang theo model luc
+# no DUOC TAO, khong theo 'model' trong settings.json. Da gap that: builder cua
+# SSC37X_CAM chay Opus 4.8 trong khi reviewer cung thu muc chay Opus 5, chi vi
+# phien cu do duoc tao tu thoi Opus 4.8.
+$claudeArgs = @('--permission-mode', $PermissionMode, '--model', $Model)
 
 # ---- Chi dan rieng cho vai tro reviewer ----
 # Dung --append-system-prompt-file chu khong phai --append-system-prompt: noi dung

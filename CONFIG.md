@@ -47,6 +47,14 @@ keo bypass sang.
 **Doi che do bang tay trong pane (shift+tab) KHONG duoc luu** - lan dung lai se
 quay ve gia tri trong bang nay. Muon giu thi sua bang roi backup.
 
+## Orca - model cho tung pane
+
+**File:** `scripts\orca\pane.ps1`, tham so `-Model` (mac dinh `opus[1m]`).
+
+Phai ep `--model` y nhu `--permission-mode`: phien duoc resume mang theo model luc
+no **duoc tao**, khong theo `model` trong `settings.json`. Da gap: builder cua
+SSC37X_CAM chay Opus 4.8 trong khi reviewer cung thu muc chay Opus 5.
+
 ## Orca - ten pane
 
 Orca hien title song cua tien trinh, nen `orca terminal rename` chi doi duoc ten
