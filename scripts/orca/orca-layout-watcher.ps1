@@ -58,6 +58,17 @@ param(
     # vay giu that ngan - dot khoi phuc muon do duoc den trong ~25 giay sau khi ngu.
     [int]$SleepGraceSeconds = 45,
 
+    # Tu dung layout khi thay nguoi dung bam mo mot project. MAC DINH TAT.
+    #
+    # Tat vi khong co cach dang tin de phan biet "nguoi dung bam" voi "Orca khoi
+    # phuc tab cu": ca hai deu chi la terminal xuat hien trong worktree. Da thu
+    # phan biet bang thoi gian va bang so pane, van sai - project tu bat len du
+    # nguoi dung khong bam, va bat lai ngay sau khi nguoi dung cho ngu.
+    #
+    # Nay da co tin hieu dang tin: activeWorktreeId trong kho trang thai cua Orca.
+    # Bam o sidebar thi no doi, Orca tu khoi phuc tab thi khong. Nen bat mac dinh.
+    [bool]$AutoOpen = $true,
+
     [switch]$BuildAll
 )
 
@@ -177,6 +188,8 @@ while ($true) {
         continue
     }
 
+    if (-not $AutoOpen) { Start-Sleep -Seconds $PollSeconds; continue }
+
     # ---- Cung mot lan mo: theo doi nguoi dung bam vao project ----
     # Project nao co terminal nhung chua co pane ten 'builder' nghia la nguoi dung
     # vua bam mo no va Orca chi cho mot PowerShell trong -> dung layout cho no.
@@ -184,13 +197,36 @@ while ($true) {
         $t = ((& $Orca terminal list --json) -join "`n") | ConvertFrom-Json
         $terms = @($t.result.terminals | Where-Object { -not $_.orphaned })
 
+        # Project nao co terminal nhung chua co pane 'builder' la ung vien.
+        $candidates = @()
         foreach ($p in $Projects) {
             $mine = @($terms | Where-Object { $_.worktreePath -eq $p.Path })
             if ($mine.Count -eq 0) { continue }
             if (@($mine | ForEach-Object { [string]$_.title }) -contains 'builder') { continue }
+            $candidates += $p
+        }
 
-            Write-Log ("nguoi dung mo {0} - dung layout" -f $p.Name)
-            Invoke-Layout @('-Project', $p.Name)
+        # Chi dung cho project NGUOI DUNG DANG MO tren giao dien.
+        #
+        # Day la cho duy nhat phan biet duoc "nguoi dung bam" voi "Orca tu khoi
+        # phuc tab cu": bam o sidebar thi Orca doi activeWorktreeId, con tu khoi
+        # phuc thi khong. Nhin vao terminal khong phan biet duoc - da thu bang
+        # thoi gian va bang so pane, deu sai, project tu bat len du khong ai bam.
+        #
+        # Doc kho trang thai chi khi co ung vien, de khong phai cop CSDL moi nhip.
+        if ($candidates.Count -gt 0) {
+            $active = ''
+            try { $active = (& node (Join-Path $PSScriptRoot 'get-active-worktree.js')) -join '' } catch { }
+
+            if (-not $active) {
+                Write-Log "khong xac dinh duoc project dang mo - khong dung gi"
+            } else {
+                foreach ($p in $candidates) {
+                    if ($active.TrimEnd('/') -ne $p.Path.TrimEnd('/')) { continue }
+                    Write-Log ("nguoi dung mo {0} - dung layout" -f $p.Name)
+                    Invoke-Layout @('-Project', $p.Name)
+                }
+            }
         }
     } catch {
         Write-Log ("LOI luc theo doi: " + $_.Exception.Message)
