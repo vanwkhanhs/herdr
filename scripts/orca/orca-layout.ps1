@@ -307,7 +307,15 @@ foreach ($p in $targets) {
     # its terminal tabs, layouts, and resume records".
     #
     # Da do: KzFlashTool 4 -> 2 ngay sau khi dong kieu nay, va dung lai van giu 2.
-    Invoke-Orca @('terminal','close','--worktree',"path:$($p.Path)",'--all','--json') | Out-Null
+    #
+    # Nhung dang '--all' cho ban cho ghi ben nen cham. Chi can no khi co agent
+    # dang chay, vi do la luc Orca sinh resume record. Project chi co shell trong
+    # - dung luc nguoi dung vua bam mo - thi dong tung cai, nhanh hon han.
+    if (@($mine | Where-Object { $_.agentIdentity }).Count -gt 0) {
+        Invoke-Orca @('terminal','close','--worktree',"path:$($p.Path)",'--all','--json') | Out-Null
+    } else {
+        foreach ($t in $mine) { Invoke-Orca @('terminal','close','--terminal',$t.handle,'--json') | Out-Null }
+    }
 
     $key  = $p.Path.TrimEnd('/').ToLowerInvariant()
     $sids = $herdrSessions[$key]
@@ -336,6 +344,17 @@ foreach ($p in $targets) {
     }
 
     Invoke-Orca @('terminal','rename','--terminal',$bh,'--title',$p.Name,'--json') | Out-Null
+
+    # Dua tab vua dung len truoc, nhung CHI khi dung mot project cu the.
+    #
+    # 'terminal create' mac dinh tao tab o nen, nen sau khi watcher dung xong
+    # nguoi dung van thay man hinh cu va phai bam them lan nua moi thay project.
+    #
+    # Khong lam khi dung nhieu project cung luc (-BuildAll): luc do focus se nhay
+    # lung tung roi dung o cai cuoi cung, khong phai cai nguoi dung muon.
+    if ($Project) {
+        Invoke-Orca @('terminal','switch','--terminal',$bh,'--json') | Out-Null
+    }
 
     Write-Host ("  OK       {0}  ({1})" -f $p.Name, $tag) -ForegroundColor Green
     $built++

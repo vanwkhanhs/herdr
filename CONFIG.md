@@ -169,7 +169,9 @@ hai statusline, skill herdr, va `E:\Kztek_Firmwave\CLAUDE.md`.
 
 Mo Orca thi **moi project deu ngu** - khong pane nao chay. Bam vao project o
 sidebar thi watcher dung `builder | reviewer | debug` cho dung project do, resume
-lich su cu. Khoang **2 giay**.
+lich su cu. Khoang **5 giay**, phan lon la do tre cua chinh CLI Orca:
+create 844 ms + split 389 + split 246 + rename 447 + switch 513 = 2,44 s, cong
+khoi dong PowerShell va doc du lieu.
 
 Ly do: moi pane Claude an ~440 MB, dung du 7 project la ~6,6 GB cho nhung thu
 chua dung den.
