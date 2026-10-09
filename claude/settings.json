@@ -4,7 +4,7 @@
       "Bash(git -C E:/Kztek_Firmwave/herdr-backup push*)"
     ]
   },
-  "model": "opus[1m]",
+  "model": "opus",
   "hooks": {
     "SessionStart": [
       {
@@ -151,6 +151,17 @@
           }
         ]
       }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/vanwk/.orca/agent-hooks/claude-hook.cmd",
+            "timeout": 10
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
@@ -158,9 +169,6 @@
     "command": "python \"C:/Users/vanwk/.claude/statusline-model.py\""
   },
   "effortLevel": "xhigh",
-  "autoUpdatesChannel": "latest",
-  "skipDangerousModePermissionPrompt": true,
-  "theme": "dark",
   "modelSettings": {
     "claude-opus-5": {
       "effortLevel": "high"
@@ -168,5 +176,8 @@
     "claude-opus-5-5": {
       "effortLevel": "high"
     }
-  }
+  },
+  "autoUpdatesChannel": "latest",
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "dark"
 }

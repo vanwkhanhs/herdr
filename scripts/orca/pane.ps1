@@ -36,7 +36,7 @@ param(
 
     # Model ep cho pane. DOI O DAY neu muon dung model khac.
     # Nhan alias ('opus', 'sonnet') hoac ten day du ('claude-opus-5').
-    # 'opus[1m]' la ban Opus 5 cua so ngu canh 1 trieu token.
+    # 'opus[1m]' = ban Opus MOI NHAT, cua so 1 trieu token (09/10/2026: Opus 5.5).
     [string]$Model = 'opus[1m]'
 )
 
