@@ -43,7 +43,11 @@
 
 [CmdletBinding()]
 param(
-    [int]$PollSeconds   = 5,
+    # Nhip quet. De duoc 1 giay vi vong lap o trang thai thuong chi goi
+    # get-active-worktree.js (~74 ms) - re hon han 'orca status' (~243 ms) va
+    # 'orca terminal list' (~249 ms), va hai cai do chi goi khi that su can.
+    [int]$PollSeconds   = 1,
+
     [int]$SettleSeconds = 12,
 
     # Cua so an han sau khi cho ngu: trong khoang nay, terminal nao xuat hien
@@ -128,7 +132,17 @@ try {
     }
 } catch { }
 
-$graceUntil = $null
+$graceUntil     = $null
+$lastActive     = $null
+$builtForActive = $false
+$lastStamp      = $null
+
+# Neu Orca dang chay san, nhan lay luon moc khoi dong de khong coi la lan mo moi
+$lastOrcaKey = $null
+try {
+    $p0 = @(Get-Process -Name orca -ErrorAction SilentlyContinue | Sort-Object StartTime)[0]
+    if ($p0 -and $lastRuntimeId) { $lastOrcaKey = $p0.StartTime.Ticks }
+} catch { }
 
 while ($true) {
 
@@ -139,15 +153,27 @@ while ($true) {
         continue
     }
 
-    $ready = $false
-    $runtimeId = $null
+    # Nhan dien lan mo moi bang THOI DIEM KHOI DONG cua tien trinh Orca, khong
+    # goi 'orca status' moi nhip - lenh do ton ~243 ms, qua dat de chay moi giay.
+    # Chi khi thay Orca vua khoi dong lai moi hoi status de cho chac la da ready.
+    $orcaKey = $null
     try {
-        $s = ((& $Orca status --json) -join "`n") | ConvertFrom-Json
-        $ready = ($s.result.runtime.state -eq 'ready') -and ($s.result.app.running -eq $true)
-        $runtimeId = $s.result.runtime.runtimeId
-    } catch { $ready = $false }
+        $p0 = @(Get-Process -Name orca -ErrorAction SilentlyContinue | Sort-Object StartTime)[0]
+        if ($p0) { $orcaKey = $p0.StartTime.Ticks }
+    } catch { }
 
-    if (-not $ready) { Start-Sleep -Seconds $PollSeconds; continue }
+    if ($orcaKey -ne $lastOrcaKey) {
+        # Orca vua khoi dong - cho den khi runtime ready roi moi lam gi
+        $ready = $false
+        try {
+            $s = ((& $Orca status --json) -join "`n") | ConvertFrom-Json
+            $ready = ($s.result.runtime.state -eq 'ready') -and ($s.result.app.running -eq $true)
+            $runtimeId = $s.result.runtime.runtimeId
+        } catch { $ready = $false }
+        if (-not $ready) { Start-Sleep -Seconds $PollSeconds; continue }
+    } else {
+        $runtimeId = $lastRuntimeId
+    }
 
     # ---- Lan mo Orca moi ----
     if ($runtimeId -ne $lastRuntimeId) {
@@ -188,45 +214,50 @@ while ($true) {
         continue
     }
 
+    $lastOrcaKey = $orcaKey
+
     if (-not $AutoOpen) { Start-Sleep -Seconds $PollSeconds; continue }
 
-    # ---- Cung mot lan mo: theo doi nguoi dung bam vao project ----
-    # Project nao co terminal nhung chua co pane ten 'builder' nghia la nguoi dung
-    # vua bam mo no va Orca chi cho mot PowerShell trong -> dung layout cho no.
+    # ---- Cua chan re nhat: kho trang thai co vua doi khong ----
+    # Goi node moi giay ton ~6% CPU. Xem moc sua cua WAL truoc (~1 ms); khong doi
+    # thi chac chan activeWorktreeId cung khong doi, khoi chay node.
+    $wal = Join-Path $env:APPDATA 'orca\profiles\local-default\profile-state.db-wal'
+    $stamp = $null
+    try { $stamp = (Get-Item -LiteralPath $wal -ErrorAction Stop).LastWriteTimeUtc.Ticks } catch { }
+
+    if ($stamp -and $stamp -eq $lastStamp) { Start-Sleep -Seconds $PollSeconds; continue }
+    $lastStamp = $stamp
+
+    # ---- Quet: project dang mo tren UI (~74 ms) ----
+    $active = ''
+    try { $active = ((& node (Join-Path $PSScriptRoot 'get-active-worktree.js')) -join '').Trim() } catch { }
+
+    if (-not $active) { Start-Sleep -Seconds $PollSeconds; continue }
+
+    $activeProject = $Projects | Where-Object { $_.Path.TrimEnd('/') -eq $active.TrimEnd('/') } | Select-Object -First 1
+    if (-not $activeProject) { $lastActive = $active; Start-Sleep -Seconds $PollSeconds; continue }
+
+    # Da xu ly project nay roi va no van dang mo -> khong kiem tra lai
+    if ($active -eq $lastActive -and $builtForActive) { Start-Sleep -Seconds $PollSeconds; continue }
+    if ($active -ne $lastActive) { $builtForActive = $false }
+    $lastActive = $active
+
+    # ---- Project dang mo la project duoc quan ly: xem co can dung khong ----
+    # Den day moi goi 'terminal list' (~249 ms), va chi mot lan cho moi lan nguoi
+    # dung chuyen sang project khac.
     try {
         $t = ((& $Orca terminal list --json) -join "`n") | ConvertFrom-Json
-        $terms = @($t.result.terminals | Where-Object { -not $_.orphaned })
+        $mine = @($t.result.terminals | Where-Object { -not $_.orphaned -and $_.worktreePath -eq $activeProject.Path })
 
-        # Project nao co terminal nhung chua co pane 'builder' la ung vien.
-        $candidates = @()
-        foreach ($p in $Projects) {
-            $mine = @($terms | Where-Object { $_.worktreePath -eq $p.Path })
-            if ($mine.Count -eq 0) { continue }
-            if (@($mine | ForEach-Object { [string]$_.title }) -contains 'builder') { continue }
-            $candidates += $p
-        }
-
-        # Chi dung cho project NGUOI DUNG DANG MO tren giao dien.
-        #
-        # Day la cho duy nhat phan biet duoc "nguoi dung bam" voi "Orca tu khoi
-        # phuc tab cu": bam o sidebar thi Orca doi activeWorktreeId, con tu khoi
-        # phuc thi khong. Nhin vao terminal khong phan biet duoc - da thu bang
-        # thoi gian va bang so pane, deu sai, project tu bat len du khong ai bam.
-        #
-        # Doc kho trang thai chi khi co ung vien, de khong phai cop CSDL moi nhip.
-        if ($candidates.Count -gt 0) {
-            $active = ''
-            try { $active = (& node (Join-Path $PSScriptRoot 'get-active-worktree.js')) -join '' } catch { }
-
-            if (-not $active) {
-                Write-Log "khong xac dinh duoc project dang mo - khong dung gi"
-            } else {
-                foreach ($p in $candidates) {
-                    if ($active.TrimEnd('/') -ne $p.Path.TrimEnd('/')) { continue }
-                    Write-Log ("nguoi dung mo {0} - dung layout" -f $p.Name)
-                    Invoke-Layout @('-Project', $p.Name)
-                }
-            }
+        if ($mine.Count -eq 0) {
+            # Chua co terminal nao - Orca chua kip mo, nhip sau xem lai
+        } elseif (@($mine | ForEach-Object { [string]$_.title }) -contains 'builder') {
+            # Da co layout roi - khong dung lai
+            $builtForActive = $true
+        } else {
+            Write-Log ("nguoi dung mo {0} - dung layout" -f $activeProject.Name)
+            Invoke-Layout @('-Project', $activeProject.Name)
+            $builtForActive = $true
         }
     } catch {
         Write-Log ("LOI luc theo doi: " + $_.Exception.Message)

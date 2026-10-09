@@ -156,3 +156,31 @@ git add -A; git commit -m "config: <doi gi>"; git push
 
 `backup.ps1` hut 8 file tu may vao repo: config Herdr, `settings.json`, hook,
 hai statusline, skill herdr, va `E:\Kztek_Firmwave\CLAUDE.md`.
+
+## Mo project theo nhu cau (mac dinh tu 09/10/2026)
+
+Mo Orca thi **moi project deu ngu** - khong pane nao chay. Bam vao project o
+sidebar thi watcher dung `builder | reviewer | debug` cho dung project do, resume
+lich su cu. Khoang **2 giay**.
+
+Ly do: moi pane Claude an ~440 MB, dung du 7 project la ~6,6 GB cho nhung thu
+chua dung den.
+
+**File:** `scripts\orca\orca-layout-watcher.ps1`
+
+| Tham so | Mac dinh | Y nghia |
+|---|---|---|
+| `PollSeconds` | 1 | nhip quet |
+| `SettleSeconds` | 12 | cho sau khi Orca ready moi cho ngu |
+| `SleepGraceSeconds` | 45 | an han sau khi ngu; bam trong khoang nay se bi dong |
+| `AutoOpen` | `$true` | tu dung layout khi bam vao project |
+| `BuildAll` | tat | bat de tro lai kieu cu: mo Orca la dung du 7 project |
+
+Cach phan biet "nguoi dung bam" voi "Orca tu khoi phuc tab": doc
+`activeWorktreeId` tu kho trang thai (`get-active-worktree.js`). Bam o sidebar thi
+no doi, Orca tu khoi phuc thi khong. Nhin vao terminal **khong** phan biet duoc -
+da thu bang thoi gian va bang so pane, deu sai.
+
+Vong lap duoc xep theo gia: moc sua WAL (~1 ms) -> `get-active-worktree.js`
+(~74 ms) -> `orca terminal list` (~249 ms) -> dung layout (~1,4 s). Cai dat chi
+goi khi that su can, nen nhip 1 giay van chi ton ~4% cua mot nhan.
