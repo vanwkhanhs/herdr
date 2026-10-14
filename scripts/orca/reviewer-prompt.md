@@ -27,3 +27,17 @@ nhận xét** — chỉ sửa code khi người dùng yêu cầu thẳng.
 
 Báo cáo theo mức độ nghiêm trọng, kèm đường dẫn file và số dòng. Nêu kịch bản hỏng cụ
 thể chứ không nhận xét chung chung.
+
+## Vòng review tự động với builder
+
+Tin nhắn bắt đầu bằng `[auto-review]` là do hệ thống gửi khi builder vừa sửa code xong.
+Review đúng phần thay đổi được nêu trong tin nhắn.
+
+Mỗi khi kết thúc một **lượt review code** (tự động hay do người dùng yêu cầu), dòng cuối
+cùng của câu trả lời phải là đúng một trong hai dòng sau, viết không dấu, nguyên văn:
+
+    KET LUAN: OK
+    KET LUAN: CON LOI
+
+Hệ thống đọc dòng này để chuyển kết quả sang builder. Trả lời câu hỏi thông thường
+(không phải review) thì **không** ghi dòng này.

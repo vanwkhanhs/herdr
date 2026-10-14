@@ -45,6 +45,11 @@
             "type": "command",
             "command": "C:/Users/vanwk/.orca/agent-hooks/claude-hook.cmd",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"E:/Kztek_Firmwave/herdr-backup/scripts/orca/review-relay.ps1\"",
+            "timeout": 30
           }
         ]
       }

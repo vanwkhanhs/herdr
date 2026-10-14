@@ -331,6 +331,20 @@ foreach ($p in $targets) {
         $failed++; continue
     }
 
+    # Dua tab vua dung len truoc, nhung CHI khi dung mot project cu the.
+    #
+    # 'terminal create' mac dinh tao tab o nen, nen sau khi watcher dung xong
+    # nguoi dung van thay man hinh cu va phai bam them lan nua moi thay project.
+    #
+    # Lam NGAY sau pane dau, khong doi tach xong: nguoi dung (nhat la tu may
+    # remote) thay tab som hon ~1 giay, cac pane con lai hien dan vao.
+    #
+    # Khong lam khi dung nhieu project cung luc (-BuildAll): luc do focus se nhay
+    # lung tung roi dung o cai cuoi cung, khong phai cai nguoi dung muon.
+    if ($Project) {
+        Invoke-Orca @('terminal','switch','--terminal',$bh,'--json') | Out-Null
+    }
+
     $prev = $bh
     for ($i = 1; $i -lt $roles.Count; $i++) {
         $role = $roles[$i]
@@ -345,17 +359,6 @@ foreach ($p in $targets) {
 
     Invoke-Orca @('terminal','rename','--terminal',$bh,'--title',$p.Name,'--json') | Out-Null
 
-    # Dua tab vua dung len truoc, nhung CHI khi dung mot project cu the.
-    #
-    # 'terminal create' mac dinh tao tab o nen, nen sau khi watcher dung xong
-    # nguoi dung van thay man hinh cu va phai bam them lan nua moi thay project.
-    #
-    # Khong lam khi dung nhieu project cung luc (-BuildAll): luc do focus se nhay
-    # lung tung roi dung o cai cuoi cung, khong phai cai nguoi dung muon.
-    if ($Project) {
-        Invoke-Orca @('terminal','switch','--terminal',$bh,'--json') | Out-Null
-    }
-
     Write-Host ("  OK       {0}  ({1})" -f $p.Name, $tag) -ForegroundColor Green
     $built++
 }
@@ -369,6 +372,9 @@ foreach ($p in $targets) {
 #
 # Chi xoa thu muc cua worktree duoc quan ly va KHONG gan voi terminal nao dang
 # song. Project khac khong bi dung toi.
+#
+# Buoc nay chay SAU khi tab da hien va da switch, nen khong lam nguoi dung cho
+# them. Dung bo no de "tang toc": thu muc chet tu cac lan cho ngu se don lai.
 if (-not $DryRun) {
     $histRoot = Join-Path $env:APPDATA 'orca\terminal-history'
     if (Test-Path -LiteralPath $histRoot) {

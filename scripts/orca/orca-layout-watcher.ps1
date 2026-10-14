@@ -27,8 +27,8 @@
     nen khong bao gio thay khoang trong. Da hong that - 4/5 project mat sach pane
     ma watcher van tuong dang la phien cu.
 
-.PARAMETER PollSeconds
-    Nhip kiem tra. Mac dinh 5 giay.
+.PARAMETER PollMs
+    Nhip kiem tra, mili giay. Mac dinh 400.
 
 .PARAMETER SettleSeconds
     Cho bao lau sau khi runtime ready moi cho ngu. Mac dinh 12 giay.
@@ -43,10 +43,10 @@
 
 [CmdletBinding()]
 param(
-    # Nhip quet. De duoc 1 giay vi vong lap o trang thai thuong chi goi
+    # Nhip quet 400 ms (truoc la 1 giay - nguoi dung bam phai cho). Re vi vong lap o trang thai thuong chi goi
     # get-active-worktree.js (~74 ms) - re hon han 'orca status' (~243 ms) va
     # 'orca terminal list' (~249 ms), va hai cai do chi goi khi that su can.
-    [int]$PollSeconds   = 1,
+    [int]$PollMs        = 400,
 
     [int]$SettleSeconds = 12,
 
@@ -91,6 +91,64 @@ function Write-Log {
     Add-Content -LiteralPath $LogFile -Value $line -Encoding utf8
 }
 
+# ---- Tin hieu bam tu MAY KHAC (remote client qua 'orca environment add') ----
+#
+# Bam project tren may remote KHONG doi activeWorktreeId cua laptop - do that
+# 09/10/2026: bam KzFlashTool, KZ_E02, E16 tu may moi, activeWorktreeId dung yen
+# o SSC37X_CAM, watcher khong biet gi. Remote client cung khong tu mo terminal.
+#
+# Dau vet duy nhat: Orca chay 'git check-ignore' trong worktree vua duoc xem, ghi
+# vao logs\main.trace.ndjson. Moi lan chuyen sang project khac dung mot lan; dang
+# xem thi chay lai moi khi file doi. Nen chi phan ung khi project duoc xem DOI,
+# khong phan ung moi lan thay check-ignore - neu khong, nguoi dung cho ngu
+# project dang xem xong, Claude/editor sua file la no tu bat lai.
+$TraceFile   = Join-Path $env:APPDATA 'orca\logs\main.trace.ndjson'
+$traceOffset = 0
+$lastViewed  = $null
+$traceArmed  = $false
+
+function Reset-TraceCursor {
+    # Bo qua moi thu da ghi truoc thoi diem nay (check-ignore luc Orca khoi dong
+    # khong phai nguoi dung bam)
+    $script:traceOffset = 0
+    try { $script:traceOffset = (Get-Item -LiteralPath $TraceFile -ErrorAction Stop).Length } catch { }
+    $script:lastViewed = $null
+}
+
+function Read-TraceEvents {
+    # Tra ve cac su kien moi ke tu lan doc truoc, DUNG THU TU:
+    #   Kind='view'  - Orca chay check-ignore trong worktree nay (dang duoc xem)
+    #   Kind='close' - MAY REMOTE dong mot tab cua worktree nay
+    #
+    # Vi sao can 'close': nut Sleep tren may remote khong gui gi sang laptop, cach
+    # duy nhat nguoi dung o may remote dep project la DONG TAB. Ma dong tab kieu do
+    # de lai ban ghi "agent dang ngu" - do that 22:02:01: 20 giay sau khi dong,
+    # Orca tu danh thuc lai bang '--dangerously-skip-permissions --resume', de
+    # len layout watcher vua dung. Nen watcher phai dong not bang '--all'.
+    try { $len = (Get-Item -LiteralPath $TraceFile -ErrorAction Stop).Length } catch { return @() }
+    if ($len -lt $script:traceOffset) { $script:traceOffset = 0 }   # file vua xoay vong
+    if ($len -eq $script:traceOffset) { return @() }
+
+    $fs = [IO.File]::Open($TraceFile, 'Open', 'Read', 'ReadWrite')
+    try {
+        $null = $fs.Seek($script:traceOffset, 'Begin')
+        $text = (New-Object IO.StreamReader($fs)).ReadToEnd()
+        $script:traceOffset = $fs.Length
+    } finally { $fs.Close() }
+
+    $events = @()
+    foreach ($line in ($text -split "`n")) {
+        if ($line -match '"git\.subcommand":"check-ignore"[^}]*?"cwd":"([^"]+)"') {
+            $events += [pscustomobject]@{ Kind = 'view'; Path = ($Matches[1] -replace '\\\\', '/' -replace '\\', '/').TrimEnd('/') }
+        } elseif ($line -match '"name":"runtime\.session-tabs\.close"' -and
+                  $line -match '"deviceId":"(?!in-process)[^"]+"' -and
+                  $line -match '"worktree":"id:[^"]*?::([^"]+)"') {
+            $events += [pscustomobject]@{ Kind = 'close'; Path = ($Matches[1] -replace '\\\\', '/' -replace '\\', '/').TrimEnd('/') }
+        }
+    }
+    return $events
+}
+
 function Invoke-Layout {
     param([string[]]$LayoutArgs)
     # -WindowStyle Hidden: thieu co nay thi luc dang nhap co mot cua so console
@@ -115,7 +173,7 @@ foreach ($line in (Get-Content -LiteralPath $LayoutScript)) {
 }
 if ($Projects.Count -eq 0) { throw "Khong doc duoc project nao tu orca-layout.ps1" }
 
-Write-Log ("watcher bat dau (poll=${PollSeconds}s settle=${SettleSeconds}s, {0} project, BuildAll={1})" -f $Projects.Count, [bool]$BuildAll)
+Write-Log ("watcher bat dau (poll=${PollMs}ms settle=${SettleSeconds}s, {0} project, BuildAll={1})" -f $Projects.Count, [bool]$BuildAll)
 
 # Neu Orca DANG chay san luc watcher khoi dong, nhan lay runtime do va KHONG coi
 # la lan mo moi. Thieu buoc nay thi moi lan khoi dong lai watcher deu cho ngu het,
@@ -149,7 +207,7 @@ while ($true) {
     if (-not (Get-Process -Name orca -ErrorAction SilentlyContinue)) {
         if ($lastRuntimeId) { Write-Log "Orca da tat - cho lan mo sau" }
         $lastRuntimeId = $null
-        Start-Sleep -Seconds $PollSeconds
+        Start-Sleep -Milliseconds $PollMs
         continue
     }
 
@@ -170,7 +228,7 @@ while ($true) {
             $ready = ($s.result.runtime.state -eq 'ready') -and ($s.result.app.running -eq $true)
             $runtimeId = $s.result.runtime.runtimeId
         } catch { $ready = $false }
-        if (-not $ready) { Start-Sleep -Seconds $PollSeconds; continue }
+        if (-not $ready) { Start-Sleep -Milliseconds $PollMs; continue }
     } else {
         $runtimeId = $lastRuntimeId
     }
@@ -178,6 +236,7 @@ while ($true) {
     # ---- Lan mo Orca moi ----
     if ($runtimeId -ne $lastRuntimeId) {
         $lastRuntimeId = $runtimeId
+        $traceArmed    = $false
         Write-Log "Orca mo moi (runtime $runtimeId) - cho ${SettleSeconds}s"
         Start-Sleep -Seconds $SettleSeconds
 
@@ -195,7 +254,7 @@ while ($true) {
             Write-Log ("LOI luc mo moi: " + $_.Exception.Message)
         }
 
-        Start-Sleep -Seconds $PollSeconds
+        Start-Sleep -Milliseconds $PollMs
         continue
     }
 
@@ -221,13 +280,54 @@ while ($true) {
             }
         } catch { }
         $lastOrcaKey = $orcaKey
-        Start-Sleep -Seconds $PollSeconds
+        Start-Sleep -Milliseconds $PollMs
         continue
     }
 
     $lastOrcaKey = $orcaKey
 
-    if (-not $AutoOpen) { Start-Sleep -Seconds $PollSeconds; continue }
+    if (-not $AutoOpen) { Start-Sleep -Milliseconds $PollMs; continue }
+
+    # ---- Bam tu may remote ----
+    # Dat TRUOC cua chan WAL: bam tu may remote khong lam WAL doi.
+    # Lan dau qua het an han (hoac luc watcher moi chay): bo qua log cu.
+    if (-not $traceArmed) { Reset-TraceCursor; $traceArmed = $true }
+    $pendingView = $null
+    foreach ($ev in @(Read-TraceEvents)) {
+        $ep = $Projects | Where-Object { $_.Path.TrimEnd('/') -eq $ev.Path } | Select-Object -First 1
+        if ($ev.Kind -eq 'close') {
+            # May remote dong tab = nguoi dung muon project nay ngu. Dong not cho
+            # sach va coi nhu dang xem no, de check-ignore ngay sau do (Orca lam moi
+            # git sau khi dong tab) khong bi hieu la "bam mo" roi dung lai.
+            $lastViewed = $ev.Path; $pendingView = $null
+            if ($ep) {
+                Write-Log ("may remote dong tab {0} - cho ngu han" -f $ep.Name)
+                try { Invoke-Layout @('-Project', $ep.Name, '-SleepAll') } catch { }
+            }
+        } elseif ($ev.Path -ne $lastViewed) {
+            $lastViewed = $ev.Path; $pendingView = $ev.Path
+        }
+    }
+    # Chi dung cho project xem CUOI CUNG trong dot - bam lien tiep A, B, C thi
+    # chi C duoc dung, khong mo ca ba.
+    if ($pendingView) {
+        $vp = $Projects | Where-Object { $_.Path.TrimEnd('/') -eq $pendingView } | Select-Object -First 1
+        if ($vp) {
+            # Goi thang orca-layout, KHONG 'terminal list' truoc de xem co can
+            # dung khong: orca-layout tu list va tu bo qua project da lanh. List
+            # o day la ~265 ms thua dung luc nguoi dung dang cho.
+            # Khac bam tren laptop: remote client khong tu mo terminal nao, nen
+            # 0 terminal cung phai dung.
+            try {
+                # Bam tren laptop cung sinh check-ignore -> chay ca o day, orca-layout
+                # se bao 'bo qua' neu nhanh duoi da dung roi. Vo hai.
+                Write-Log ("dang xem {0} (laptop hoac may remote) - kiem tra layout" -f $vp.Name)
+                Invoke-Layout @('-Project', $vp.Name)
+            } catch {
+                Write-Log ("LOI luc dung cho may remote: " + $_.Exception.Message)
+            }
+        }
+    }
 
     # ---- Cua chan re nhat: kho trang thai co vua doi khong ----
     # Goi node moi giay ton ~6% CPU. Xem moc sua cua WAL truoc (~1 ms); khong doi
@@ -236,20 +336,20 @@ while ($true) {
     $stamp = $null
     try { $stamp = (Get-Item -LiteralPath $wal -ErrorAction Stop).LastWriteTimeUtc.Ticks } catch { }
 
-    if ($stamp -and $stamp -eq $lastStamp) { Start-Sleep -Seconds $PollSeconds; continue }
+    if ($stamp -and $stamp -eq $lastStamp) { Start-Sleep -Milliseconds $PollMs; continue }
     $lastStamp = $stamp
 
     # ---- Quet: project dang mo tren UI (~74 ms) ----
     $active = ''
     try { $active = ((& node (Join-Path $PSScriptRoot 'get-active-worktree.js')) -join '').Trim() } catch { }
 
-    if (-not $active) { Start-Sleep -Seconds $PollSeconds; continue }
+    if (-not $active) { Start-Sleep -Milliseconds $PollMs; continue }
 
     $activeProject = $Projects | Where-Object { $_.Path.TrimEnd('/') -eq $active.TrimEnd('/') } | Select-Object -First 1
-    if (-not $activeProject) { $lastActive = $active; Start-Sleep -Seconds $PollSeconds; continue }
+    if (-not $activeProject) { $lastActive = $active; Start-Sleep -Milliseconds $PollMs; continue }
 
     # Da xu ly project nay roi va no van dang mo -> khong kiem tra lai
-    if ($active -eq $lastActive -and $builtForActive) { Start-Sleep -Seconds $PollSeconds; continue }
+    if ($active -eq $lastActive -and $builtForActive) { Start-Sleep -Milliseconds $PollMs; continue }
     if ($active -ne $lastActive) { $builtForActive = $false }
     $lastActive = $active
 
@@ -274,5 +374,5 @@ while ($true) {
         Write-Log ("LOI luc theo doi: " + $_.Exception.Message)
     }
 
-    Start-Sleep -Seconds $PollSeconds
+    Start-Sleep -Milliseconds $PollMs
 }

@@ -93,6 +93,16 @@ payload**, kèm cột `revision`.
 - **`Setup Script` chỉ chạy khi tạo worktree mới**, không chạy lúc mở app — không dùng
   được để dựng layout.
 
+### 10b. Remote (máy khác ghép cặp): ba thứ không như trên laptop
+
+- **Bấm project** trên máy remote không đổi `activeWorktreeId` của laptop và không mở
+  terminal nào — watcher dựa vào `activeWorktreeId` sẽ không biết gì. Tín hiệu đúng:
+  `git check-ignore` trong `logs\main.trace.ndjson`, chỉ phản ứng khi project đang xem ĐỔI.
+- **Nút Sleep** trên máy remote không gửi gì sang laptop (đo: không một sự kiện nào).
+- **Đóng tab** từ máy remote thì CÓ sang laptop, nhưng Orca ghi "agent đang ngủ" và
+  ~20 giây sau tự đánh thức bằng `--dangerously-skip-permissions --resume`, đè lên
+  layout. Phải đóng nốt bằng `--all`.
+
 ---
 
 ## Watcher

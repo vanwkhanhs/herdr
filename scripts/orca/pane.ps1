@@ -43,7 +43,17 @@ param(
 $env:CLAUDE_CODE_DISABLE_TERMINAL_TITLE = '1'
 $host.UI.RawUI.WindowTitle = $Role
 
-if ($Role -eq 'debug') { return }
+if ($Role -eq 'debug') {
+    # Lenh 'ngu' cho project nay ngu - thay nut Sleep cua Orca, nut do khong
+    # hoat dong khi remote tu may khac. Nho thu muc luc khoi dong (= worktree)
+    # de 'ngu' van dung du nguoi dung da cd sang cho khac.
+    $global:OrcaProjectDir = (Get-Location).Path
+    $nguScript = Join-Path $PSScriptRoot 'ngu.ps1'
+    # Nhung san duong dan vao than ham: bien $nguScript mat khi pane.ps1 ket thuc.
+    Set-Item -Path function:global:ngu -Value ([scriptblock]::Create("& '$nguScript' @args"))
+    Write-Host "Go 'ngu' de cho project nay ngu (thay nut Sleep khi remote)." -ForegroundColor DarkGray
+    return
+}
 
 # ---- Che do quyen mac dinh cho tung vai tro ----
 # DOI O DAY neu muon pane khoi dong o che do khac. Gia tri hop le:

@@ -25,6 +25,8 @@ Herdr khong chay thi lui ve: builder `claude --continue`, reviewer phien moi.
 | `pane.ps1` | Launcher cho tung pane. Dat ten pane, chon resume hay tao moi. |
 | `orca-layout-watcher.ps1` | Theo doi Orca, moi lan Orca mo len dung layout mot lan. |
 | `install-watcher.ps1` | Dang ky watcher thanh Scheduled Task chay khi dang nhap. |
+| `review-relay.ps1` | Stop hook: builder xong -> reviewer review -> bao lai builder. |
+| `ngu.ps1` | Lenh `ngu` trong pane debug: cho project ngu (thay nut Sleep khi remote). |
 
 ## Dung
 
@@ -179,3 +181,38 @@ Hai ly do khong lam cach khac:
   va chuoi dai bi cat cut.
 
 Builder khong nhan chi dan nay.
+
+
+## Vong builder <-> reviewer tu dong
+
+`review-relay.ps1` dang ky o `hooks.Stop` trong `~/.claude/settings.json`, chay sau
+MOI luot cua MOI phien Claude, nhung chi lam viec voi pane ten `builder`/`reviewer`
+cua Orca (tra bang `ORCA_PANE_KEY`). Herdr, herdr-backup, terminal thuong: thoat ngay.
+
+- **Builder xong** va code DOI so voi lan gui truoc (HEAD + git status + git diff) ->
+  gui reviewer `[auto-review] Vong n/3 ...`. Builder chi tra loi, khong sua -> im.
+- **Reviewer xong** va dong cuoi la `KET LUAN: OK` / `KET LUAN: CON LOI` -> bao lai
+  builder. Khong co dong do (tra loi cau hoi thuong) -> im.
+- Toi da **3 vong tu dong** lien tiep; nguoi dung tu go vao builder thi dem lai.
+- Noi dung dai ghi o `<project>/.git/orca-review/` (`builder-last.md`,
+  `review-last.md`, `state.json`); tin nhan gui sang pane chi la mot dong tro toi file.
+- Log: `%LOCALAPPDATA%\orca-review-relay.log`.
+
+Tat: tao file `<project>/.git/orca-review/off` (mot project), hoac bo dong hook trong
+settings.json (tat ca). Thu khong gui that: `$env:ORCA_REVIEW_RELAY_DRYRUN='1'`.
+
+**Luu y:** tin nhan duoc GO vao pane doi dien - dang go do o pane do thi chu se tron.
+
+## Dung tu may khac (remote)
+
+May khac ghep cap bang `orca environment add --pairing-code ...` (da lam 09/10/2026,
+qua Tailscale). Moi thu van chay tren laptop; may kia chi hien thi.
+
+- **Bam project** tren may remote KHONG doi `activeWorktreeId` cua laptop. Watcher
+  nhan ra qua `git check-ignore` trong `logs\main.trace.ndjson` (Orca chay lenh do o
+  worktree dang duoc xem). Chi phan ung khi project dang xem DOI.
+- **Nut Sleep** tren may remote khong gui gi sang laptop. Thay bang:
+  dong tab (watcher thay `runtime.session-tabs.close` tu thiet bi remote -> ngu han
+  bang `--all`), hoac go `ngu` trong pane debug.
+- **Lech khung** khi ca hai may cung mo: PTY chi co mot kich thuoc, Claude fullscreen
+  ve theo kich thuoc do. Doi kich thuoc cua so tren may dang dung de Orca cap nhat.
