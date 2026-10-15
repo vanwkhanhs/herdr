@@ -64,6 +64,10 @@ $Projects = @(
     @{ Name = 'KzFlashTool';              Path = 'E:/Kztek_Firmwave/KzFlashTool' }
     # Tram sac xe dien 10 kenh - chuyen tu E:\ vao day ngay 15/10/2026
     @{ Name = 'EV_CS_10CH_V1.0';          Path = 'E:/Kztek_Firmwave/EV_CS_10CH_V1.0' }
+    # May build SDK Luckfox Core3566 qua SSH (wsl-ubuntu-2004). Builder tiep phien
+    # cu cb9209ca, chep tu E:\kztek\claude sang ngay 15/10/2026. Thu muc chi co
+    # README + 'git init' de Orca nhan, code that nam tren may build.
+    @{ Name = 'BUILD_LUCKFOX3566';        Path = 'E:/Kztek_Firmwave/BUILD_LUCKFOX3566' }
 
     # Hai thu muc nay von khong phai git repo - da 'git init' de Orca nhan
     # (orca repo add tu choi thu muc khong phai git). Khong commit gi, chi tao .git.

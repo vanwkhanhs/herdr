@@ -115,6 +115,19 @@ function Reset-TraceCursor {
     $script:lastViewed = $null
 }
 
+$RepoPaths = @{}
+function Get-RepoPath([string]$RepoId) {
+    # repoId -> duong dan (dau '/'), nap lai danh sach repo khi gap id la
+    if (-not $script:RepoPaths.ContainsKey($RepoId)) {
+        try {
+            foreach ($r in (((& $Orca repo list --json) -join "`n") | ConvertFrom-Json).result.repos) {
+                $script:RepoPaths[$r.id] = ([string]$r.path).Replace('\', '/').TrimEnd('/')
+            }
+        } catch { }
+    }
+    return $script:RepoPaths[$RepoId]
+}
+
 function Read-TraceEvents {
     # Tra ve cac su kien moi ke tu lan doc truoc, DUNG THU TU:
     #   Kind='view'  - Orca chay check-ignore trong worktree nay (dang duoc xem)
@@ -138,7 +151,14 @@ function Read-TraceEvents {
 
     $events = @()
     foreach ($line in ($text -split "`n")) {
-        if ($line -match '"git\.subcommand":"check-ignore"[^}]*?"cwd":"([^"]+)"') {
+        if ($line -match '"breadcrumb\.name":"sidebar_worktree_activate"' -and $line -match '"repoId":"([^"]+)"') {
+            # Bam sidebar TREN LAPTOP. Ghi ngay luc bam, con activeWorktreeId trong
+            # DB thi ghi tre - do that 15/10/2026: bam KZ_E02 trong an han 3 lan, ca 3
+            # lan DB chua kip doi, watcher tuong tab khoi phuc muon va cho ngu lai.
+            # Duong dan trong log bi che ('E:[redacted-path]'), nen dung repoId.
+            $p = Get-RepoPath $Matches[1]
+            if ($p) { $events += [pscustomobject]@{ Kind = 'click'; Path = $p } }
+        } elseif ($line -match '"git\.subcommand":"check-ignore"[^}]*?"cwd":"([^"]+)"') {
             $events += [pscustomobject]@{ Kind = 'view'; Path = ($Matches[1] -replace '\\\\', '/' -replace '\\', '/').TrimEnd('/') }
         } elseif ($line -match '"name":"runtime\.session-tabs\.close"' -and
                   $line -match '"deviceId":"(?!in-process)[^"]+"' -and
@@ -191,6 +211,8 @@ try {
 } catch { }
 
 $graceUntil     = $null
+$graceOpened    = @{}      # project nguoi dung bam mo trong an han - khong cho ngu
+$seedActive     = $true    # lan dau vao vong thuong: ghi nhan project dang chon san
 $lastActive     = $null
 $builtForActive = $false
 $lastStamp      = $null
@@ -247,6 +269,10 @@ while ($true) {
             } else {
                 Write-Log "cho tat ca project ngu"
                 Invoke-Layout @('-SleepAll')
+                # Bat dau doc log TU DAY de bat cu bam trong an han. Moi thu truoc
+                # do (Orca khoi phuc, chinh lenh cho ngu) khong phai nguoi dung bam.
+                Reset-TraceCursor; $traceArmed = $true; $seedActive = $true
+                $graceOpened = @{}
                 $graceUntil = (Get-Date).AddSeconds($SleepGraceSeconds)
                 Write-Log ("an han {0}s - tab Orca khoi phuc muon se bi cho ngu tiep" -f $SleepGraceSeconds)
             }
@@ -265,6 +291,19 @@ while ($true) {
     # trong suot 45 giay. Day la loi nang nhat cua co che an han.
     if ($graceUntil -and (Get-Date) -lt $graceUntil) {
         try {
+            # Cu bam sidebar trong an han -> dung NGAY va mien cho ngu project do.
+            # Chi tin 'click': 'view' (check-ignore) luc nay con do Orca tu khoi phuc
+            # project dang chon tu lan truoc, khong phai nguoi dung.
+            foreach ($ev in @(Read-TraceEvents)) {
+                if ($ev.Kind -ne 'click') { continue }
+                $cp = $Projects | Where-Object { $_.Path.TrimEnd('/') -eq $ev.Path } | Select-Object -First 1
+                if (-not $cp) { continue }
+                $graceOpened[$cp.Path] = $true
+                $lastViewed = $ev.Path
+                Write-Log ("nguoi dung bam {0} trong an han - dung, khong cho ngu" -f $cp.Name)
+                Invoke-Layout @('-Project', $cp.Name)
+            }
+
             $activeNow = ''
             try { $activeNow = ((& node (Join-Path $PSScriptRoot 'get-active-worktree.js')) -join '').Trim() } catch { }
 
@@ -272,6 +311,7 @@ while ($true) {
             $terms = @($t.result.terminals | Where-Object { -not $_.orphaned })
 
             foreach ($p in $Projects) {
+                if ($graceOpened.ContainsKey($p.Path)) { continue }
                 if ($activeNow -and $p.Path.TrimEnd('/') -eq $activeNow.TrimEnd('/')) { continue }
                 $mine = @($terms | Where-Object { $_.worktreePath -eq $p.Path })
                 if ($mine.Count -eq 0) { continue }
@@ -294,15 +334,20 @@ while ($true) {
     # Cung luc do ghi nhan project DANG CHON san tren laptop, coi nhu da xu ly:
     # project dang chon luc Orca mo (con sot tu lan truoc, dang ngu) khong phai
     # nguoi dung vua bam. Thieu buoc nay thi no tu bat len ngay sau an han.
-    if (-not $traceArmed) {
-        Reset-TraceCursor; $traceArmed = $true
+    if (-not $traceArmed) { Reset-TraceCursor; $traceArmed = $true; $seedActive = $true }
+    if ($seedActive) {
+        $seedActive = $false
         try { $lastActive = ((& node (Join-Path $PSScriptRoot 'get-active-worktree.js')) -join '').Trim() } catch { }
         $builtForActive = $true
     }
     $pendingView = $null
     foreach ($ev in @(Read-TraceEvents)) {
         $ep = $Projects | Where-Object { $_.Path.TrimEnd('/') -eq $ev.Path } | Select-Object -First 1
-        if ($ev.Kind -eq 'close') {
+        if ($ev.Kind -eq 'click') {
+            # Bam sidebar tren laptop: luon kiem tra, ke ca bam lai dung project
+            # dang chon (vd vua cho ngu no xong, bam lai de mo).
+            $lastViewed = $ev.Path; $pendingView = $ev.Path
+        } elseif ($ev.Kind -eq 'close') {
             # May remote dong tab = nguoi dung muon project nay ngu. Dong not cho
             # sach va coi nhu dang xem no, de check-ignore ngay sau do (Orca lam moi
             # git sau khi dong tab) khong bi hieu la "bam mo" roi dung lai.
