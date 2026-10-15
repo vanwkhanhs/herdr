@@ -291,7 +291,14 @@ while ($true) {
     # ---- Bam tu may remote ----
     # Dat TRUOC cua chan WAL: bam tu may remote khong lam WAL doi.
     # Lan dau qua het an han (hoac luc watcher moi chay): bo qua log cu.
-    if (-not $traceArmed) { Reset-TraceCursor; $traceArmed = $true }
+    # Cung luc do ghi nhan project DANG CHON san tren laptop, coi nhu da xu ly:
+    # project dang chon luc Orca mo (con sot tu lan truoc, dang ngu) khong phai
+    # nguoi dung vua bam. Thieu buoc nay thi no tu bat len ngay sau an han.
+    if (-not $traceArmed) {
+        Reset-TraceCursor; $traceArmed = $true
+        try { $lastActive = ((& node (Join-Path $PSScriptRoot 'get-active-worktree.js')) -join '').Trim() } catch { }
+        $builtForActive = $true
+    }
     $pendingView = $null
     foreach ($ev in @(Read-TraceEvents)) {
         $ep = $Projects | Where-Object { $_.Path.TrimEnd('/') -eq $ev.Path } | Select-Object -First 1
@@ -360,9 +367,12 @@ while ($true) {
         $t = ((& $Orca terminal list --json) -join "`n") | ConvertFrom-Json
         $mine = @($t.result.terminals | Where-Object { -not $_.orphaned -and $_.worktreePath -eq $activeProject.Path })
 
-        if ($mine.Count -eq 0) {
-            # Chua co terminal nao - Orca chua kip mo, nhip sau xem lai
-        } elseif (@($mine | ForEach-Object { [string]$_.title }) -contains 'builder') {
+        # 0 terminal cung phai dung. Truoc day cho Orca tu mo mot shell roi moi
+        # dung, nhung Orca khong phai luc nao cung mo: 15/10/2026 bam EV_CS (tab da
+        # bi dong) -> Orca khong mo gi, watcher cho mai, project khong bao gio len.
+        # Khong so dung nham luc nguoi dung vua cho ngu project dang xem: luc do
+        # activeWorktreeId khong doi nen khong di toi day.
+        if (@($mine | ForEach-Object { [string]$_.title }) -contains 'builder') {
             # Da co layout roi - khong dung lai
             $builtForActive = $true
         } else {
