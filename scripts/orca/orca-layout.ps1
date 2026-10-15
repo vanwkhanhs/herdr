@@ -62,6 +62,8 @@ $Projects = @(
     @{ Name = 'kz_e16.net_firmware-dev1'; Path = 'E:/Kztek_Firmwave/Elevator/kz_e16.net_firmware-dev1' }
     @{ Name = 'smart_lock_control_12ch';  Path = 'E:/Kztek_Firmwave/iLocker/board_12ch/smart_lock_control_12ch' }
     @{ Name = 'KzFlashTool';              Path = 'E:/Kztek_Firmwave/KzFlashTool' }
+    # Tram sac xe dien 10 kenh - chuyen tu E:\ vao day ngay 15/10/2026
+    @{ Name = 'EV_CS_10CH_V1.0';          Path = 'E:/Kztek_Firmwave/EV_CS_10CH_V1.0' }
 
     # Hai thu muc nay von khong phai git repo - da 'git init' de Orca nhan
     # (orca repo add tu choi thu muc khong phai git). Khong commit gi, chi tao .git.

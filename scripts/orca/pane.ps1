@@ -98,4 +98,12 @@ if ($SessionId) {
     Write-Host "Khong resume duoc phien $SessionId - mo phien khac." -ForegroundColor Yellow
 }
 
-if ($Role -eq 'builder') { claude @claudeArgs --continue } else { claude @claudeArgs }
+# --continue o thu muc chua co hoi thoai nao thi Claude bao loi va THOAT, pane chi
+# con shell trong. Gap that 15/10/2026 khi them EV_CS_10CH_V1.0 (vua chuyen thu
+# muc nen duong dan moi chua co lich su). Kiem tra truoc: Claude luu hoi thoai o
+# ~/.claude/projects/<duong dan, ky tu khong phai chu/so doi thanh '-'>/*.jsonl
+$projKey = (Get-Location).Path -replace '[^A-Za-z0-9]', '-'
+$projDir = Join-Path $env:USERPROFILE ".claude\projects\$projKey"
+$hasHistory = [bool](Get-ChildItem -LiteralPath $projDir -Filter *.jsonl -File -ErrorAction SilentlyContinue | Select-Object -First 1)
+
+if ($Role -eq 'builder' -and $hasHistory) { claude @claudeArgs --continue } else { claude @claudeArgs }

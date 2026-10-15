@@ -103,6 +103,16 @@ payload**, kèm cột `revision`.
   ~20 giây sau tự đánh thức bằng `--dangerously-skip-permissions --resume`, đè lên
   layout. Phải đóng nốt bằng `--all`.
 
+### 10c. Thêm project mới: hai chỗ vướng ở lần mở đầu
+
+- Đường dẫn mới → Claude hiện hộp thoại **"trust this folder?"** ở cả builder và
+  reviewer, kể cả khi chỉ là chuyển thư mục cũ sang chỗ khác. Người dùng phải tự chọn.
+- Thư mục chưa có hội thoại nào → `claude --continue` báo lỗi và thoát, pane builder
+  chỉ còn shell trống. `pane.ps1` nay kiểm tra `~/.claude/projects/<key>/*.jsonl` trước.
+- Chạy `orca-layout.ps1 -Project` bằng tay thì Orca quét git repo đó, watcher thấy
+  `check-ignore` và dựng **lần nữa** chồng lên. Kết quả vẫn đúng 3 pane, nhưng đừng
+  ngạc nhiên khi log watcher có thêm một lượt.
+
 ---
 
 ## Watcher
