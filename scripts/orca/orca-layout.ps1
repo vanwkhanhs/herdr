@@ -68,6 +68,8 @@ $Projects = @(
     # cu cb9209ca, chep tu E:\kztek\claude sang ngay 15/10/2026. Thu muc chi co
     # README + 'git init' de Orca nhan, code that nam tren may build.
     @{ Name = 'BUILD_LUCKFOX3566';        Path = 'E:/Kztek_Firmwave/BUILD_LUCKFOX3566' }
+    # Module van tay - tao moi 16/10/2026, chua chot chip
+    @{ Name = 'KZ_FP_MODULE';             Path = 'E:/Kztek_Firmwave/Fingerprint/KZ_FP_MODULE' }
 
     # Hai thu muc nay von khong phai git repo - da 'git init' de Orca nhan
     # (orca repo add tu choi thu muc khong phai git). Khong commit gi, chi tao .git.
