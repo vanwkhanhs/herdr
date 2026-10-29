@@ -1,0 +1,19 @@
+#!/bin/bash
+# In URL ghep cap moi nhat cua Orca server ra stdout - de may client tu lay qua SSH,
+# ma khong di qua chat/log. Cai vao ~/.local/bin/orca-pair-url tren kztek-build.
+#
+# Tren may client (PowerShell):
+#   orca environment add --name kztek-build --pairing-code (ssh kztek@100.121.167.64 .local/bin/orca-pair-url)
+#
+# Moi lan orca-server khoi dong, `orca serve` sinh 1 URL = 1 thiet bi moi trong
+# ~/.config/orca/orca-devices.json (lastSeenAt 0 cho toi khi co client dung).
+sudo -n journalctl _SYSTEMD_USER_UNIT=orca-server.service -o cat \
+    | grep '^Pairing URL:' | tail -1 | sed 's/^Pairing URL: *//'
+
+python3 - <<'PY' >&2
+import json, os
+d = json.load(open(os.path.expanduser('~/.config/orca/orca-devices.json')))
+if not any(x.get('lastSeenAt') == 0 for x in d):
+    print('CANH BAO: URL nay da co may dung roi. Can URL moi thi phai '
+          'systemctl --user restart orca-server - GIET moi terminal tren server.')
+PY

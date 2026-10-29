@@ -23,15 +23,23 @@ sudo journalctl _SYSTEMD_USER_UNIT=orca-server.service -f   # log (can sudo tren
 
 ## Ghep cap may moi
 
-Ma ghep cap nam trong log service (dong `Pairing URL:`). Lay va them tu Git Bash:
+Ma ghep cap nam trong log service (dong `Pairing URL:`). `~/.local/bin/orca-pair-url`
+(ban goc: `orca-pair-url` canh file nay) in ra URL moi nhat. Tren may client, PowerShell:
 
-```bash
-ssh kztek-build 'sudo journalctl _SYSTEMD_USER_UNIT=orca-server.service -o cat | grep "^Pairing URL:" | tail -1 | sed "s/^Pairing URL: *//"' > pair.txt
-orca environment add --name kztek-build --pairing-code "$(cat pair.txt)"; rm pair.txt
+```powershell
+orca environment add --name kztek-build --pairing-code (ssh kztek@100.121.167.64 .local/bin/orca-pair-url)
 ```
 
-Dung Git Bash, KHONG dung PowerShell 5.1: no lam hong nhay kep (PITFALLS #18).
-Ma ghep cap la bi mat - dung in ra, dung commit.
+Roi THOAT HAN Orca (ca icon khay) va mo lai - app dang chay khong thay environment moi.
+
+- Khong can khoa SSH: kztek-build bat Tailscale SSH, may cung tailnet vao thang (do that
+  2026-10-29). Lan dau co the hien link dang nhap Tailscale - mo link roi cho.
+- Lenh tren khong co nhay kep nen PowerShell 5.1 khong lam hong (PITFALLS #18); URL chi
+  gom chu/so va `/ : = ?`.
+- **Moi lan orca-server khoi dong sinh 1 URL = 1 thiet bi** (`orca-devices.json`,
+  `lastSeenAt: 0` toi khi co client dung). URL da co may dung thi `orca-pair-url` canh bao;
+  muon URL moi phai restart orca-server = giet moi terminal tren server - hoi nguoi dung truoc.
+- Ma ghep cap la bi mat - dung in ra, dung commit.
 
 ## Cap nhat Orca
 
