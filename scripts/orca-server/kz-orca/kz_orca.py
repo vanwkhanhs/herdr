@@ -52,6 +52,9 @@ ROLES = ('builder', 'reviewer', 'debug')
 # Mot "lan xem" project ket thuc khi khong thay git status cua no trong chung nay giay.
 # Client lam moi ~15 s mot lan khi dang xem -> 45 s la du chac nguoi dung da roi di.
 VIEW_GAP = 45
+# Cho Orca khoi phuc tab cu xong (pane tu dang ky vai tro) truoc khi ket luan project
+# hong va dung lai. Chi cho khi project da co terminal; project trong thi dung ngay.
+RESTORE_SETTLE = 8
 MAX_ROUNDS = 3
 MARKER = '[auto-review]'
 
@@ -170,6 +173,21 @@ def build_layout(path, why=''):
         return False                                   # da lanh
 
     mine = [t for t in terms if norm(t.get('worktreePath', '')) == path]
+    if mine:
+        # Co the Orca DANG khoi phuc tab cu: pane khoi phuc chay lai pane.sh va tu dang ky
+        # vai tro sau vai giay. Danh gia ngay thi giet dung tab client vua gan vao -> client
+        # hien "Reconnecting to remote runtime" toi 1 phut. Do that 29/10/2026: smart_lock
+        # khoi phuc 12:00:26, watcher giet + dung lai 12:00:27.
+        deadline = time.time() + RESTORE_SETTLE
+        while time.time() < deadline:
+            time.sleep(1)
+            terms = terminals()
+            if terms is None:
+                break
+            if all(r in live_roles(path, terms) for r in roles):
+                log('%s: Orca da khoi phuc du pane - giu nguyen' % p['name'])
+                return False
+        mine = [t for t in (terms or []) if norm(t.get('worktreePath', '')) == path]
     if mine:
         # --all: xoa luon tab, layout va resume record (PITFALLS #4)
         orca('terminal', 'close', '--worktree', 'path:' + path, '--all')

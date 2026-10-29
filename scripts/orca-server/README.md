@@ -135,3 +135,13 @@ Trang thai: `~/.local/state/kz-orca/` (`panes.json`, `sessions.json`, `watch.jso
   bang tay; unit dat `LANG=C.UTF-8`.
 - `update_json`: KHONG `fn(d) or d` - loc het thi `{}` la falsy, giu nguyen du lieu cu.
 - Lan dau mo moi thu muc, Claude hoi "trust this folder?" o ca builder va reviewer.
+
+## "Reconnecting to remote runtime" keo dai (29/10/2026)
+
+Hai nguyen nhan da gap, deu la terminal BI GIET trong khi client dang gan vao no:
+- **Khoi dong lai `orca-server`** giet daemon terminal -> moi pane mo truoc do chet, client
+  cho toi 1 phut roi bo. Dung khoi dong lai server khi dang lam viec.
+- **kz-orca dung layout qua som**: bam project -> Orca khoi phuc tab cu (12:00:26) ->
+  watcher thay pane chua dang ky vai tro, giet + dung lai (12:00:27). Pane khoi phuc chi
+  can vai giay de chay lai pane.sh. Nay `build_layout` cho toi `RESTORE_SETTLE` = 8 giay
+  neu project da co terminal; du vai tro thi giu nguyen.
