@@ -81,3 +81,11 @@ Kem theo: `~/.claude/agents` (fw-*), skill arm-cortex-expert / embedded-systems 
 harness-creator, statusline, `~/Kztek_Firmwave/CLAUDE.md` + `_harness_chuan`.
 `settings.json` tren server GOP them model/effort/tui/statusLine - hook do Orca server
 tu ghi (15 su kien) giu nguyen. Hook Windows (review-relay.ps1, herdr) KHONG chep.
+- **Ten thu muc phien dinh `\r`**: danh sach anh xa tao bang PowerShell (CRLF) roi doc
+  bang `while read` trong Bash -> 11 thu muc phien tren server co `\r` cuoi ten, nhin
+  giong het nhung Claude KHONG tim thay. Kiem tra: `ls ~/.claude/projects | cat -A`
+  (thay `^M`). Da doi ten lai. Doc file tu Windows trong Bash: `tr -d '\r'` truoc.
+- **`claude -p` an stdin**: chay trong `ssh host 'bash -s' <<EOF` thi no doc ca phan con
+  lai cua script lam cau hoi, cac dong sau khong chay. Luon them `</dev/null`.
+- Da do: Claude tren server dat khoa thu muc phien = duong dan, ky tu khong phai
+  chu/so doi thanh `-` (vd `/tmp/kz_key.test` -> `-tmp-kz-key-test`).
