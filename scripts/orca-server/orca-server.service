@@ -1,0 +1,17 @@
+# Orca server chay 24/7 tren kztek-build. Laptop / may khac ket noi bang
+# 'orca environment add --pairing-code ...'. Dia chi quang ba la IP Tailscale
+# de vao duoc tu moi noi trong tailnet.
+# Cap nhat Orca: giai nen AppImage moi vao ~/.local/opt/orca/app roi
+#   systemctl --user restart orca-server
+[Unit]
+Description=Orca server (orca serve) - kztek-build
+After=default.target
+
+[Service]
+Environment=PATH=%h/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=%h/.local/opt/orca/app/resources/bin/orca-ide serve --port 6768 --pairing-address 100.121.167.64
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
