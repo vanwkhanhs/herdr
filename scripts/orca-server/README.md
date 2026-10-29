@@ -50,3 +50,34 @@ systemctl --user restart orca-server
 - Chay thu bang `timeout N orca-ide serve` se ket thuc bang loat loi GPU/zygote va
   `SIGILL` - do `timeout` giet tien trinh, KHONG phai loi that. Service chay on dinh.
 - Secret luu khong ma hoa (khong co keyring tren may headless) - Orca tu canh bao.
+
+## Project da chuyen len (29/10/2026)
+
+Chep NGUYEN thu muc lam viec (ke ca thay doi chua commit) tu laptop qua LAN
+(`tar | ssh kztek@192.168.21.105`), giu cau truc:
+
+| Laptop | kztek-build |
+|---|---|
+| `E:\Kztek_Firmwave\...` | `~/Kztek_Firmwave/...` |
+| `E:\project_kztek\...` | `~/project_kztek/...` |
+
+11 project: KZ_E02.NET, kz_e32, kz_e16, smart_lock_control_12ch, KzFlashTool,
+EV_CS_10CH_V1.0, SDK_RV1126B, SSC37X_CAM, BUILD_LUCKFOX3566, KZ_FP_MODULE, herdr-backup.
+Da `orca repo add --environment kztek-build` ca 11.
+
+Sau khi chep phai sua 2 thu, khong thi `git status` bao sai:
+- `git config core.autocrlf true` trong tung repo (laptop dung true; file tren dia la CRLF).
+- Quyen chay: tar cua Git Bash tu danh `+x` cho file `.sh` -> go `+x` cho file git ghi
+  `100644`, them `+x` cho file git ghi `100755`.
+Doi chieu: so file chua commit tren server = tren laptop, 11/11 khop.
+
+Lich su Claude: 22 phien chep vao `~/.claude/projects/-home-kztek-<duong dan>/`
+(khoa = duong dan, ky tu khong phai chu/so doi thanh `-`). Kiem tra JSON: 22/22 hop le.
+
+SDK_RV1126B: zip `rwa023...sdk` 30,6 GB da co san o `~/Downloads/RV1126B` -> hard link,
+khong chep lai. Zip `rv1126b-v1-0` 39,6 GB chep qua LAN.
+
+Kem theo: `~/.claude/agents` (fw-*), skill arm-cortex-expert / embedded-systems /
+harness-creator, statusline, `~/Kztek_Firmwave/CLAUDE.md` + `_harness_chuan`.
+`settings.json` tren server GOP them model/effort/tui/statusLine - hook do Orca server
+tu ghi (15 su kien) giu nguyen. Hook Windows (review-relay.ps1, herdr) KHONG chep.
