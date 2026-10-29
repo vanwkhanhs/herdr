@@ -107,3 +107,31 @@ Da do: mo terminal that tu laptop -> chay dung thu muc, co `claude`.
 
 Con mot module native khong chay tren 18.04: `sherpa-onnx` (nhan dang giong noi) doi
 GLIBCXX_3.4.29, may co 3.4.25. Khong anh huong terminal / Claude.
+
+## kz-orca: layout builder|reviewer|debug + vong review tren server (29/10/2026)
+
+Ban Linux cua `scripts/orca/*.ps1`. Ma nguon `kz-orca/`, cai bang
+`bash kz-orca/install.sh` (chay lai bao nhieu lan cung duoc) vao `~/.local/opt/kz-orca`.
+
+| Thanh phan | Viec |
+|---|---|
+| `kz-orca-watcher.service` | client xem project dang ngu -> dung 3 pane; client dong tab -> ngu han; Orca server khoi dong lai -> cho moi project ngu |
+| `pane.sh` | lenh khoi dong pane (source): ghi vai tro vao so dang ky, chon phien, `ngu` trong debug |
+| hook `SessionStart` | ghi ma phien theo vai tro -> lan sau builder/reviewer mo dung phien cua minh |
+| hook `Stop` | builder sua code xong -> reviewer; reviewer co `KET LUAN:` -> builder (toi da 3 vong) |
+| `projects.json` | 10 project quan ly (herdr-backup CO Y khong) |
+
+Trang thai: `~/.local/state/kz-orca/` (`panes.json`, `sessions.json`, `watch.json`, `kz-orca.log`).
+
+**Khac laptop - do that:**
+- `orca terminal rename` tren Linux DE TEN MOI PANE thanh ten tab -> khong nhan vai tro
+  bang ten pane. Moi pane tu ghi `ORCA_TERMINAL_HANDLE` + vai tro vao `panes.json`.
+- `terminal create` co `--title` thi pane khong nhan ten OSC -> tao khong `--title`, doi ten tab sau.
+- Trace server khong co `check-ignore`/`sidebar_worktree_activate`. Tin hieu "dang xem" la
+  `git status` trong worktree (client lam moi ~15 s, CHI worktree dang xem). Mot lan xem moi
+  = >45 s khong thay status cua project do.
+- `terminal split` tra `result.split.handle`, `create` tra `result.terminal.handle`.
+- Python 3.6 + locale C giai ma ASCII -> vo voi tieng Viet. Moi lenh con giai ma UTF-8
+  bang tay; unit dat `LANG=C.UTF-8`.
+- `update_json`: KHONG `fn(d) or d` - loc het thi `{}` la falsy, giu nguyen du lieu cu.
+- Lan dau mo moi thu muc, Claude hoi "trust this folder?" o ca builder va reviewer.

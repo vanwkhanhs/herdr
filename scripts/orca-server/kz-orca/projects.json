@@ -1,0 +1,42 @@
+[
+    {
+        "name":  "KZ_E02.NET",
+        "path":  "~/Kztek_Firmwave/Access_Control/KZ_E02.NET"
+    },
+    {
+        "name":  "kz_e32.net_firmware-dev1",
+        "path":  "~/Kztek_Firmwave/Elevator/kz_e32.net_firmware-dev1"
+    },
+    {
+        "name":  "kz_e16.net_firmware-dev1",
+        "path":  "~/Kztek_Firmwave/Elevator/kz_e16.net_firmware-dev1"
+    },
+    {
+        "name":  "smart_lock_control_12ch",
+        "path":  "~/Kztek_Firmwave/iLocker/board_12ch/smart_lock_control_12ch"
+    },
+    {
+        "name":  "KzFlashTool",
+        "path":  "~/Kztek_Firmwave/KzFlashTool"
+    },
+    {
+        "name":  "EV_CS_10CH_V1.0",
+        "path":  "~/Kztek_Firmwave/EV_CS_10CH_V1.0"
+    },
+    {
+        "name":  "SDK_RV1126B",
+        "path":  "~/project_kztek/SDK_RV1126B"
+    },
+    {
+        "name":  "SSC37X_CAM",
+        "path":  "~/project_kztek/SSC37X_CAM"
+    },
+    {
+        "name":  "BUILD_LUCKFOX3566",
+        "path":  "~/Kztek_Firmwave/BUILD_LUCKFOX3566"
+    },
+    {
+        "name":  "KZ_FP_MODULE",
+        "path":  "~/Kztek_Firmwave/Fingerprint/KZ_FP_MODULE"
+    }
+]
