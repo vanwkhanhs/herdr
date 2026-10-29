@@ -89,3 +89,21 @@ tu ghi (15 su kien) giu nguyen. Hook Windows (review-relay.ps1, herdr) KHONG che
   lai cua script lam cau hoi, cac dong sau khong chay. Luon them `</dev/null`.
 - Da do: Claude tren server dat khoa thu muc phien = duong dan, ky tu khong phai
   chu/so doi thanh `-` (vd `/tmp/kz_key.test` -> `-tmp-kz-key-test`).
+
+## Loi "Failed to load native module: pty.node" (da sua 29/10/2026)
+
+Trieu chung: tu laptop mo terminal tren kztek-build bao `Cannot find module
+'./prebuilds/linux-x64//pty.node'`. Ten loi danh lac huong - file CO, nhung
+`build/Release/pty.node` doi **GLIBC_2.28**, Ubuntu 18.04 chi co 2.27. node-pty thu
+het cac cho roi chi in loi cua cho cuoi cung.
+
+Orca dong goi san ban `orcad-template/targets/linux-x64-glibc217/.../pty.node` (chi can
+glibc 2.14) cho tien trinh nen orcad, nhung orcad hong preflight nen Orca roi ve ban
+chinh. Sua: `fix-glibc227.sh` chep ban glibc217 vao `build/orca-napi-linux-x64/` - cho
+node-pty tim DAU TIEN - khong ghi de file goc. Chay lam `ExecStartPre` nen cap nhat
+Orca (giai nen lai app/) van tu sua lai.
+
+Da do: mo terminal that tu laptop -> chay dung thu muc, co `claude`.
+
+Con mot module native khong chay tren 18.04: `sherpa-onnx` (nhan dang giong noi) doi
+GLIBCXX_3.4.29, may co 3.4.25. Khong anh huong terminal / Claude.
