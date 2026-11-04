@@ -251,6 +251,9 @@ ca hai may (server: `python3`, file phai bo CRLF). Them project moi -> them ten 
   `projectGroups`, `repos`; `content_hash` = sha256 payload, tang `revision`), bat lai.
   Sao luu o `~/.local/state/kz-orca/backup-20261104-141155/`. Tat server = dong moi
   terminal tren server -> hoi nguoi dung truoc.
+- **Can Orca >= 1.4.230 o MAY CLIENT** (laptop, PC nha). Ban 1.4.225-1.4.229 khong loc nhom
+  trung ID: moi project don vao tieu de dau, tieu de thu hai nam trong (loi #30045, do that
+  04/11/2026 tren laptop 1.4.225). Server khong ve sidebar nen phien ban server khong anh huong.
 - Them nhom MOI: tao o laptop truoc, roi lam lai buoc doi ID tren server. Chi them project
   vao nhom da co thi chay `orca-groups.py` o ca hai may la du.
 - **Khong dung nhom long nhau**: nhom con (Elevator cu) ve dinh tieu de len dong ben duoi
