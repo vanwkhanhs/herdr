@@ -244,6 +244,15 @@ ca hai may (server: `python3`, file phai bo CRLF). Them project moi -> them ten 
 - Kztek_Firmwave = firmware MCU (STM32 co `.ioc`; KZ_FP_MODULE chua chot chip nhung cung la firmware).
 - Linux_SoC = SDK_RV1126B, SSC37X_CAM, BUILD_LUCKFOX3566. Tools = KzFlashTool, herdr-backup.
   Hardware = Cam bao trong (KiCad, chi laptop).
+- **Nhom 2 may PHAI cung ID.** Sidebar chi gop nhom trung ID (`getDistinctProjectGroups`,
+  khong gop theo ten) -> laptop va server tu tao "Kztek_Firmwave" voi ID rieng = 2 tieu de.
+  RPC khong cho dat ID, server cung khong nhan ID nhom la (`moveProject` doi thanh khong
+  nhom). Da lam 04/11/2026: tat orca-server, doi ID trong `profile-state.db` (2 tai lieu
+  `projectGroups`, `repos`; `content_hash` = sha256 payload, tang `revision`), bat lai.
+  Sao luu o `~/.local/state/kz-orca/backup-20261104-141155/`. Tat server = dong moi
+  terminal tren server -> hoi nguoi dung truoc.
+- Them nhom MOI: tao o laptop truoc, roi lam lai buoc doi ID tren server. Chi them project
+  vao nhom da co thi chay `orca-groups.py` o ca hai may la du.
 - **Khong dung nhom long nhau**: nhom con (Elevator cu) ve dinh tieu de len dong ben duoi
   khi bat tieu de theo may. Da go Elevator, kz_e16/kz_e32 nam thang trong Kztek_Firmwave.
 

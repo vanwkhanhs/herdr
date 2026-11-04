@@ -4,6 +4,8 @@
 #   Server:  python3 orca-groups.py [--dry]        (Python 3.6 tren kztek-build)
 # Moi runtime (laptop, kztek-build) giu danh sach nhom RIENG -> chay o ca hai noi.
 # Nhom ngoai PLAN ma rong sau khi xep thi bi xoa (vd Elevator cu).
+# Nhom o 2 may phai CUNG ID moi gop thanh 1 tieu de - script nay tao nhom thi ID ngau nhien.
+# Nhom moi: xem README muc "Nhom project" truoc khi chay tren server.
 import io, json, os, socket, sys, unicodedata, uuid
 
 # (nhom, [ten project]) - thu tu trong list = thu tu tren sidebar
