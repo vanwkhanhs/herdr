@@ -28,6 +28,7 @@ Herdr khong chay thi lui ve: builder `claude --continue`, reviewer phien moi.
 | `review-relay.ps1` | Stop hook: builder xong -> reviewer review -> bao lai builder. |
 | `ngu.ps1` | Lenh `ngu` trong pane debug: cho project ngu (thay nut Sleep khi remote). |
 | `orca-rpc.py` | Goi 1 RPC cua runtime Orca dang chay (`ui.get`, `ui.set`...) - doi trang thai UI khong can tat Orca. |
+| `orca-groups.py` | Xep project vao nhom sidebar theo `PLAN` (Kztek_Firmwave / Linux_SoC / Tools / Hardware). Chay o CA laptop va kztek-build. |
 
 ## Dung
 
@@ -233,4 +234,16 @@ python scripts/orca/orca-rpc.py ui.set '{"visibleWorkspaceHostIds":["local","run
 `runtime:<id environment>` lay tu `orca environment list --json`. Bo: tich "All hosts"
 trong bo loc. May co >= 3 may (PC nha: local + laptop + kztek-build) lam duoc tren UI:
 bo tich may khong can xem. Da dat cho laptop 04/11/2026.
+
+### Nhom project (04/11/2026)
+
+Moi runtime giu danh sach nhom RIENG: nhom tao tren laptop khong sang kztek-build.
+`orca-groups.py` xep theo `PLAN` o dau file, chay lai bao nhieu lan cung duoc, chay o
+ca hai may (server: `python3`, file phai bo CRLF). Them project moi -> them ten vao `PLAN`.
+
+- Kztek_Firmwave = firmware MCU (STM32 co `.ioc`; KZ_FP_MODULE chua chot chip nhung cung la firmware).
+- Linux_SoC = SDK_RV1126B, SSC37X_CAM, BUILD_LUCKFOX3566. Tools = KzFlashTool, herdr-backup.
+  Hardware = Cam bao trong (KiCad, chi laptop).
+- **Khong dung nhom long nhau**: nhom con (Elevator cu) ve dinh tieu de len dong ben duoi
+  khi bat tieu de theo may. Da go Elevator, kz_e16/kz_e32 nam thang trong Kztek_Firmwave.
 
