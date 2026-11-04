@@ -3,7 +3,7 @@
 #   Laptop:  python scripts/orca/orca-groups.py [--dry]
 #   Server:  python3 orca-groups.py [--dry]        (Python 3.6 tren kztek-build)
 # Moi runtime (laptop, kztek-build) giu danh sach nhom RIENG -> chay o ca hai noi.
-# Nhom ngoai PLAN ma rong sau khi xep thi bi xoa (vd Elevator cu).
+# Nhom ngoai PLAN ma rong sau khi xep thi bi xoa; nhom con cua nhom trong PLAN thi giu.
 # Nhom o 2 may phai CUNG ID moi gop thanh 1 tieu de - script nay tao nhom thi ID ngau nhien.
 # Nhom moi: xem README muc "Nhom project" truoc khi chay tren server.
 import io, json, os, socket, sys, unicodedata, uuid
@@ -80,7 +80,12 @@ for order, (gname, names) in enumerate(PLAN):
     if g.get('tabOrder') != order or g.get('parentGroupId'):
         act('nhom %s: thu tu %d' % (gname, order), 'projectGroup.update',
             {'groupId': g['id'], 'updates': {'tabOrder': order}})
+    # Nhom con Orca tu dung theo thu muc (folder-scan, vd Elevator trong Kztek_Firmwave):
+    # project nam trong do coi nhu da dung nhom - keo ra thi lan khoi dong sau Orca lai dung lai.
+    subs = set(k['id'] for k in groups if k.get('parentGroupId') == g['id'])
     for i, r in enumerate(members):
+        if r.get('projectGroupId') in subs:
+            continue
         if r.get('projectGroupId') == g['id'] and r.get('projectGroupOrder') == i:
             continue
         act('  %s -> %s' % (r['displayName'], gname), 'projectGroup.moveProject',
@@ -89,7 +94,7 @@ for order, (gname, names) in enumerate(PLAN):
 # Nhom cu ngoai PLAN: xoa khi khong con project/nhom con (sau khi da don project ra)
 repos = repos if DRY else rpc('repo.list')['repos']
 for g in rpc('projectGroup.list')['groups']:
-    if g['id'] in wanted or g['name'] in [p[0] for p in PLAN]:
+    if g['id'] in wanted or g['name'] in [p[0] for p in PLAN] or g.get('parentGroupId') in wanted:
         continue
     used = [r['displayName'] for r in repos if r.get('projectGroupId') == g['id']
             and not any(nfc(r['displayName']) in map(nfc, names) for _, names in PLAN)]

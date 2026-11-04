@@ -256,6 +256,8 @@ ca hai may (server: `python3`, file phai bo CRLF). Them project moi -> them ten 
   04/11/2026 tren laptop 1.4.225). Server khong ve sidebar nen phien ban server khong anh huong.
 - Them nhom MOI: tao o laptop truoc, roi lam lai buoc doi ID tren server. Chi them project
   vao nhom da co thi chay `orca-groups.py` o ca hai may la du.
-- **Khong dung nhom long nhau**: nhom con (Elevator cu) ve dinh tieu de len dong ben duoi
-  khi bat tieu de theo may. Da go Elevator, kz_e16/kz_e32 nam thang trong Kztek_Firmwave.
+- **Nhom con theo thu muc (Elevator)**: Orca >= 1.4.230 tu dung lai nhom con tu cau truc
+  thu muc khi khoi dong (`createdFrom: folder-scan`, ID moi) va keo kz_e16/kz_e32 vao.
+  Xoa la lan sau no lai dung -> giu, `orca-groups.py` bo qua project nam trong nhom con.
+  Tren 1.4.225 nhom con ve de tieu de len dong khac; tu 1.4.248 ve dung (do 04/11/2026).
 
