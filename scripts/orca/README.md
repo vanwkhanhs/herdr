@@ -27,6 +27,7 @@ Herdr khong chay thi lui ve: builder `claude --continue`, reviewer phien moi.
 | `install-watcher.ps1` | Dang ky watcher thanh Scheduled Task chay khi dang nhap. |
 | `review-relay.ps1` | Stop hook: builder xong -> reviewer review -> bao lai builder. |
 | `ngu.ps1` | Lenh `ngu` trong pane debug: cho project ngu (thay nut Sleep khi remote). |
+| `orca-rpc.py` | Goi 1 RPC cua runtime Orca dang chay (`ui.get`, `ui.set`...) - doi trang thai UI khong can tat Orca. |
 
 ## Dung
 
@@ -216,3 +217,20 @@ qua Tailscale). Moi thu van chay tren laptop; may kia chi hien thi.
   bang `--all`), hoac go `ngu` trong pane debug.
 - **Lech khung** khi ca hai may cung mo: PTY chi co mot kich thuoc, Claude fullscreen
   ve theo kich thuoc do. Doi kich thuoc cua so tren may dang dung de Orca cap nhat.
+
+## Sidebar chia muc theo may (Local / kztek-build)
+
+Orca KHONG co "Group by Host" (chi None/Status/PR/Project), nhung co san tieu de theo
+may: hien khi `ui.visibleWorkspaceHostIds` la danh sach TUONG MINH >= 2 may. De `null`
+("All hosts") thi project la chinh, may tron lan (`addHostSectionRows`,
+`preferProjectGrouping`). Tren UI tich du moi may se tu quay ve `null`, nen laptop
+(chi co 2 may) phai dat qua RPC - Orca dang chay van nhan, luu luon xuong DB:
+
+```bash
+python scripts/orca/orca-rpc.py ui.set '{"visibleWorkspaceHostIds":["local","runtime:148fb571-5896-4631-ba4c-6007203f662a"]}'
+```
+
+`runtime:<id environment>` lay tu `orca environment list --json`. Bo: tich "All hosts"
+trong bo loc. May co >= 3 may (PC nha: local + laptop + kztek-build) lam duoc tren UI:
+bo tich may khong can xem. Da dat cho laptop 04/11/2026.
+
