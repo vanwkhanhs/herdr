@@ -40,7 +40,8 @@ try {
 
     // worktreeId co dang "<repoId>::<duong dan>" - lay phan duong dan
     const i = id.indexOf("::");
-    process.stdout.write(i >= 0 ? id.slice(i + 2) : id);
+    // Project kieu folder co duong dan 'E:\a\b' - doi ve '/' nhu project git
+    process.stdout.write((i >= 0 ? id.slice(i + 2) : id).split("\\").join("/"));
 } catch {
     // Doc khong duoc thi im lang - watcher se coi nhu khong xac dinh duoc
     // va khong dung gi, an toan hon la doan bua.

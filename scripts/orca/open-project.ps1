@@ -31,7 +31,7 @@ if (-not (Test-Path -LiteralPath $LayoutScript)) { throw "Khong thay orca-layout
 
 # Doc danh sach project tu orca-layout.ps1 - mot nguon su that duy nhat
 $projects = @()
-foreach ($line in (Get-Content -LiteralPath $LayoutScript)) {
+foreach ($line in (Get-Content -LiteralPath $LayoutScript -Encoding UTF8)) {
     if ($line -match "Name\s*=\s*'([^']+)'\s*;\s*Path\s*=\s*'([^']+)'") {
         $projects += [pscustomobject]@{ Name = $Matches[1]; Path = $Matches[2] }
     }
@@ -47,12 +47,14 @@ if (-not $Orca) {
 if (-not $Orca) { throw "Khong tim thay orca CLI." }
 
 $openPaths = @{}
+try { [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false) } catch { }
 try {
     $raw = & $Orca terminal list --json
     $list = ($raw -join "`n") | ConvertFrom-Json
     foreach ($t in $list.result.terminals) {
         if ($t.orphaned) { continue }
-        $openPaths[$t.worktreePath] = ($openPaths[$t.worktreePath] + 1)
+        $k = ([string]$t.worktreePath).Replace('\', '/')   # project kieu folder bao '\'
+        $openPaths[$k] = ($openPaths[$k] + 1)
     }
 } catch { }
 

@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Dung layout builder/reviewer/debug cho cac project trong Orca.
 
@@ -55,7 +55,15 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Orca CLI ghi JSON bang UTF-8, con PowerShell 5.1 giai ma output cua exe theo
+# trang ma console - watcher chay an nen la 437. Thieu dong nay thi duong dan co
+# dau ('Cam báo trống') bi hong, khong khop project nao (do that 09/11/2026).
+try { [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false) } catch { }
+
 # ---- Danh sach project. Them project moi = them mot dong o day. ----
+# File nay PHAI luu UTF-8 CO BOM: co chu tieng Viet, ma PowerShell 5.1 doc file
+# khong BOM theo ANSI (1252) -> sai ten. Path dung dau '/' ke ca project kieu
+# folder (Orca bao '\' cho loai nay - script tu chuan hoa khi so sanh).
 $Projects = @(
     @{ Name = 'KZ_E02.NET';               Path = 'E:/Kztek_Firmwave/Access_Control/KZ_E02.NET' }
     @{ Name = 'kz_e32.net_firmware-dev1'; Path = 'E:/Kztek_Firmwave/Elevator/kz_e32.net_firmware-dev1' }
@@ -75,6 +83,12 @@ $Projects = @(
     # (orca repo add tu choi thu muc khong phai git). Khong commit gi, chi tao .git.
     @{ Name = 'RV1126B dual cam 5MP';     Path = 'E:/project_kztek/SDK_RV1126B' }
     @{ Name = 'SSC37X_CAM';               Path = 'E:/project_kztek/SSC37X_CAM' }
+
+    # Hai project phan cung (mach, tai lieu), Orca kieu 'folder' - khong phai git
+    # nen vong review tu dong (review-relay) khong chay, reviewer chi dung tay.
+    # Them 09/11/2026.
+    @{ Name = 'Cam báo trống';            Path = 'E:/project_kztek/Cam báo trống' }
+    @{ Name = 'Bộ nhận diện khuôn mặt';   Path = 'E:/project_kztek/Bộ nhận diện khuôn mặt' }
 
     # CO Y KHONG quan ly herdr-backup (hien thi trong Orca la 'orca-backup').
     # Day la pane nguoi dung ngoi lam viec truc tiep; dua vao danh sach thi
@@ -204,6 +218,8 @@ if ($Project) {
 $listed = Invoke-Orca @('terminal','list','--json')
 if ($null -eq $listed) { throw "Khong doc duoc danh sach terminal - Orca da chay chua?" }
 $all = @($listed.result.terminals)
+# Project kieu folder: Orca bao worktreePath dang 'E:\a\b', project git dang 'E:/a/b'
+foreach ($t in $all) { if ($t.worktreePath) { $t.worktreePath = ([string]$t.worktreePath).Replace('\', '/') } }
 
 # ---- Dong terminal mo coi ----
 # Khi Orca khoi dong lai, tab tren giao dien mat nhung PTY van song: Orca bao

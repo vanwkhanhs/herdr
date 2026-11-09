@@ -14,7 +14,7 @@ PLAN = [
                         'smart_lock_control_12ch', 'EV_CS_10CH_V1.0', 'KZ_FP_MODULE']),
     ('Linux_SoC', ['SDK_RV1126B', 'SSC37X_CAM', 'BUILD_LUCKFOX3566']),
     ('Tools', ['KzFlashTool', 'herdr-backup']),
-    ('Hardware', ['Cam báo trống']),
+    ('Hardware', ['Cam báo trống', 'Bộ nhận diện khuôn mặt']),
 ]
 DRY = '--dry' in sys.argv
 

@@ -78,6 +78,13 @@ param(
 
 $ErrorActionPreference = 'Continue'
 
+# Watcher chay an -> console trang ma 437. Orca CLI va node ghi UTF-8: phai doi,
+# khong thi duong dan co dau tieng Viet hong, khong khop project nao.
+try { [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false) } catch { }
+
+# Project kieu folder: Orca bao duong dan 'E:\a\b', project git 'E:/a/b'
+function Norm-Path([string]$P) { return $P.Replace('\', '/').TrimEnd('/') }
+
 $LayoutScript = Join-Path $PSScriptRoot 'orca-layout.ps1'
 $LogFile      = Join-Path $env:LOCALAPPDATA 'orca-layout-watcher.log'
 
@@ -186,7 +193,7 @@ if (-not $Orca) { throw "Khong tim thay orca CLI." }
 
 # Danh sach project doc tu orca-layout.ps1 - mot nguon su that duy nhat
 $Projects = @()
-foreach ($line in (Get-Content -LiteralPath $LayoutScript)) {
+foreach ($line in (Get-Content -LiteralPath $LayoutScript -Encoding UTF8)) {
     if ($line -match "Name\s*=\s*'([^']+)'\s*;\s*Path\s*=\s*'([^']+)'") {
         $Projects += [pscustomobject]@{ Name = $Matches[1]; Path = $Matches[2] }
     }
@@ -313,7 +320,7 @@ while ($true) {
             foreach ($p in $Projects) {
                 if ($graceOpened.ContainsKey($p.Path)) { continue }
                 if ($activeNow -and $p.Path.TrimEnd('/') -eq $activeNow.TrimEnd('/')) { continue }
-                $mine = @($terms | Where-Object { $_.worktreePath -eq $p.Path })
+                $mine = @($terms | Where-Object { (Norm-Path $_.worktreePath) -eq $p.Path })
                 if ($mine.Count -eq 0) { continue }
                 Write-Log ("{0}: tab khoi phuc muon - cho ngu" -f $p.Name)
                 Invoke-Layout @('-Project', $p.Name, '-SleepAll')
@@ -410,7 +417,7 @@ while ($true) {
     # dung chuyen sang project khac.
     try {
         $t = ((& $Orca terminal list --json) -join "`n") | ConvertFrom-Json
-        $mine = @($t.result.terminals | Where-Object { -not $_.orphaned -and $_.worktreePath -eq $activeProject.Path })
+        $mine = @($t.result.terminals | Where-Object { -not $_.orphaned -and (Norm-Path $_.worktreePath) -eq $activeProject.Path })
 
         # 0 terminal cung phai dung. Truoc day cho Orca tu mo mot shell roi moi
         # dung, nhung Orca khong phai luc nao cung mo: 15/10/2026 bam EV_CS (tab da

@@ -55,6 +55,28 @@ Them mot dong vao mang `$Projects` dau file `orca-layout.ps1`:
 (`orca terminal list --json`), dung dau `/`. Muon co lich su thi project do
 phai co space tuong ung ben Herdr voi pane dat ten `builder` / `reviewer`.
 
+Sau khi sua danh sach phai khoi dong lai watcher (no doc `$Projects` luc bat dau) -
+Orca dang chay thi watcher nhan lay, khong cho ngu project nao:
+
+```powershell
+Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" |
+  ? CommandLine -like '*orca-layout-watcher*' | % { Stop-Process -Id $_.ProcessId -Force }
+Start-ScheduledTask -TaskName OrcaLayoutWatcher
+```
+
+**Project ten tieng Viet / kieu folder** (vd `Cam báo trống`, them 09/11/2026):
+- `orca-layout.ps1` phai luu **UTF-8 co BOM**. PowerShell 5.1 doc file khong BOM theo
+  ANSI 1252 -> ten va duong dan sai. Sua bang editor nho giu BOM.
+- Watcher chay an o trang ma console 437; Orca CLI ghi UTF-8 -> cac script dat
+  `[Console]::OutputEncoding` = UTF-8, khong thi duong dan co dau khong khop.
+- Project Orca tao tu thu muc thuong (`kind: folder`, khong phai git) bao `worktreePath`
+  dang `E:\a\b`; project git bao `E:/a/b`. Script chuan hoa ve `/` truoc khi so.
+- Khong phai git -> `review-relay.ps1` tu thoat, vong review tu dong khong chay;
+  reviewer van mo nhung chi dung tay.
+- Lan dau them: terminal Claude nguoi dung tu mo truoc do khong mang ten vai tro,
+  nen lan bam project ke tiep watcher dong no va dung 3 pane; builder `--continue`
+  lay lai phien gan nhat cua thu muc.
+
 ## Nam cho da sai that
 
 1. **Lenh khoi dong dai bi Orca cat cut.** Khi khoi dong lai, Orca **go lai**
@@ -243,7 +265,7 @@ ca hai may (server: `python3`, file phai bo CRLF). Them project moi -> them ten 
 
 - Kztek_Firmwave = firmware MCU (STM32 co `.ioc`; KZ_FP_MODULE chua chot chip nhung cung la firmware).
 - Linux_SoC = SDK_RV1126B, SSC37X_CAM, BUILD_LUCKFOX3566. Tools = KzFlashTool, herdr-backup.
-  Hardware = Cam bao trong (KiCad, chi laptop).
+  Hardware = Cam bao trong, Bo nhan dien khuon mat (mach/tai lieu, chi laptop).
 - **Nhom 2 may PHAI cung ID.** Sidebar chi gop nhom trung ID (`getDistinctProjectGroups`,
   khong gop theo ten) -> laptop va server tu tao "Kztek_Firmwave" voi ID rieng = 2 tieu de.
   RPC khong cho dat ID, server cung khong nhan ID nhom la (`moveProject` doi thanh khong

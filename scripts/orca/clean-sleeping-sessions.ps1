@@ -51,7 +51,7 @@ $LayoutScript = Join-Path $PSScriptRoot 'orca-layout.ps1'
 if (-not (Test-Path -LiteralPath $LayoutScript)) { throw "Khong thay orca-layout.ps1" }
 
 $paths = @()
-foreach ($line in (Get-Content -LiteralPath $LayoutScript)) {
+foreach ($line in (Get-Content -LiteralPath $LayoutScript -Encoding UTF8)) {
     if ($line -match "Path\s*=\s*'([^']+)'") { $paths += $Matches[1] }
 }
 if ($paths.Count -eq 0) { throw "Khong doc duoc duong dan project nao tu orca-layout.ps1" }
