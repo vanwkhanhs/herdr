@@ -73,6 +73,10 @@ Start-ScheduledTask -TaskName OrcaLayoutWatcher
   dang `E:\a\b`; project git bao `E:/a/b`. Script chuan hoa ve `/` truoc khi so.
 - Khong phai git -> `review-relay.ps1` tu thoat, vong review tu dong khong chay;
   reviewer van mo nhung chi dung tay.
+- Phien gan nhat cua thu muc dang chay **nen** (`claude --bg` / dispatch tu `claude agents`)
+  thi `claude --continue` bao "most recent conversation is running in the background" roi
+  thoat -> builder chi con shell (do that 10/11/2026). `pane.ps1` nay tim phien nen dang song
+  cung thu muc (`claude agents --json`, ~0,4 s) va `claude attach` vao no.
 - Lan dau them: terminal Claude nguoi dung tu mo truoc do khong mang ten vai tro,
   nen lan bam project ke tiep watcher dong no va dung 3 pane; builder `--continue`
   lay lai phien gan nhat cua thu muc.

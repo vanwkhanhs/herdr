@@ -92,6 +92,34 @@ if ($Role -eq 'reviewer') {
     }
 }
 
+# ---- Builder: phien gan nhat cua thu muc dang chay NEN thi gan vao no ----
+# Phien nen (claude --bg, hoac dispatch tu 'claude agents') song doc lap voi
+# terminal. Khi no dang chay, 'claude --continue' bao "Your most recent
+# conversation is running in the background" roi THOAT, pane chi con shell trong.
+# Do that 10/11/2026: Bo nhan dien khuon mat, phien nen 99a4ef44 dang working.
+# 'claude attach' mo dung phien do trong pane; thoat attach thi phien van chay.
+if ($Role -eq 'builder' -and -not $SessionId) {
+    $here = (Get-Location).Path.Replace('\', '/').TrimEnd('/')
+    $bg = $null
+    $enc = [Console]::OutputEncoding
+    try {
+        # JSON cua claude la UTF-8; thu muc co dau tieng Viet thi phai giai ma dung
+        [Console]::OutputEncoding = New-Object Text.UTF8Encoding($false)
+        $list = ((claude agents --json 2>$null) -join "`n") | ConvertFrom-Json
+        $bg = @($list | Where-Object {
+                $_.kind -eq 'background' -and $_.pid -and
+                ([string]$_.cwd).Replace('\', '/').TrimEnd('/') -eq $here
+            } | Sort-Object startedAt -Descending)[0]
+    } catch { } finally { try { [Console]::OutputEncoding = $enc } catch { } }
+
+    if ($bg) {
+        Write-Host ("Phien gan nhat dang chay nen ({0}) - gan vao." -f $bg.name) -ForegroundColor DarkGray
+        claude attach $bg.id
+        if ($LASTEXITCODE -eq 0) { return }
+        Write-Host "Khong gan duoc phien nen - mo theo cach thuong." -ForegroundColor Yellow
+    }
+}
+
 if ($SessionId) {
     claude @claudeArgs --resume $SessionId
     if ($LASTEXITCODE -eq 0) { return }
