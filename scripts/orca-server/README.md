@@ -123,7 +123,7 @@ Ban Linux cua `scripts/orca/*.ps1`. Ma nguon `kz-orca/`, cai bang
 
 | Thanh phan | Viec |
 |---|---|
-| `kz-orca-watcher.service` | client xem project dang ngu -> dung 3 pane; client dong tab -> ngu han; Orca server khoi dong lai -> cho moi project ngu |
+| `kz-orca-watcher.service` | client bam/xem project dang ngu -> dung 3 pane; client dong tab layout -> ngu han (dong tab phu thi giu nguyen); Orca server khoi dong lai -> cho moi project ngu |
 | `pane.sh` | lenh khoi dong pane (source): ghi vai tro vao so dang ky, chon phien, `ngu` trong debug |
 | hook `SessionStart` | ghi ma phien theo vai tro -> lan sau builder/reviewer mo dung phien cua minh |
 | hook `Stop` | builder sua code xong -> reviewer; reviewer co `KET LUAN:` -> builder (toi da 3 vong) |
@@ -136,8 +136,14 @@ Trang thai: `~/.local/state/kz-orca/` (`panes.json`, `sessions.json`, `watch.jso
   bang ten pane. Moi pane tu ghi `ORCA_TERMINAL_HANDLE` + vai tro vao `panes.json`.
 - `terminal create` co `--title` thi pane khong nhan ten OSC -> tao khong `--title`, doi ten tab sau.
 - Trace server khong co `check-ignore`/`sidebar_worktree_activate`. Tin hieu "dang xem" la
-  `git status` trong worktree (client lam moi ~15 s, CHI worktree dang xem). Mot lan xem moi
-  = >45 s khong thay status cua project do.
+  `git status` trong worktree (client lam moi dinh ky, CHI worktree dang xem: ~15 s do 29/10,
+  ~60 s do 10/11). Mot lan xem moi = >90 s khong thay status cua project do.
+- Tin hieu "nguoi dung bam project" (ca bam lai project dang xem) la `git for-each-ref` trong
+  worktree - khong chay dinh ky. Bam vao project vua ngu -> dung lai ngay.
+- `runtime.session-tabs.close` co `tabId`. Chi cho ngu khi tab do chua pane vai tro trong
+  `panes.json`. **Loi 10/11/2026:** dong mot tab terminal phu cua SDK_RV1126B -> watcher cho
+  ngu ca project, roi bam lai khong mo duoc (cho tab dong lam `suppressed`, chi go khi roi
+  project >45 s, ma client lai lam moi 60 s/lan).
 - `terminal split` tra `result.split.handle`, `create` tra `result.terminal.handle`.
 - Python 3.6 + locale C giai ma ASCII -> vo voi tieng Viet. Moi lenh con giai ma UTF-8
   bang tay; unit dat `LANG=C.UTF-8`.

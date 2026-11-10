@@ -6,8 +6,8 @@ tren kztek-build (Ubuntu 18.04). Ban Linux cua scripts/orca/*.ps1 tren laptop.
 Mot file, nhieu lenh con:
 
   watch                  daemon (systemd kz-orca-watcher): bam project -> dung layout,
-                         client dong tab -> cho ngu han, Orca server khoi dong lai ->
-                         cho moi project ngu
+                         client dong tab layout -> cho ngu han, Orca server khoi dong
+                         lai -> cho moi project ngu
   layout <path>          dung layout cho mot project (bo qua neu da lanh)
   sleep  <path>          cho project ngu: dong het terminal bang --all
   register <role> <path> pane.sh goi luc pane khoi dong: ghi vai tro vao so dang ky
@@ -21,9 +21,12 @@ KHAC LAPTOP - do that 29/10/2026:
     vao so dang ky (panes.json); moi thu tra so nay.
   - Khong co 'check-ignore' / 'sidebar_worktree_activate' trong trace cua server. Tin
     hieu "dang xem project" la 'git status' chay trong worktree do (client lam moi
-    Source Control dinh ky ~15 s, CHI cho worktree dang xem).
-  - Client dong tab -> 'runtime.session-tabs.close' kem deviceId. Lenh dong chay tai
-    server (chinh watcher nay) KHONG ghi su kien nay -> khong tu hieu nham minh.
+    dinh ky, CHI cho worktree dang xem: ~15 s do 29/10, ~60 s do 10/11).
+  - Bam project tren sidebar (ca bam lai project dang xem) -> 'git for-each-ref' trong
+    worktree do. Lenh nay KHONG chay dinh ky (do 10/11: khoang cach giua cac lan bat
+    thuong, 3 s .. vai ngay) -> dung lam tin hieu "nguoi dung bam".
+  - Client dong tab -> 'runtime.session-tabs.close' kem deviceId + tabId. Lenh dong chay
+    tai server (chinh watcher nay) KHONG ghi su kien nay -> khong tu hieu nham minh.
 """
 
 import fcntl
@@ -50,8 +53,12 @@ REVIEWER_PROMPT = os.path.join(BASE, 'reviewer-prompt.md')
 ROLES = ('builder', 'reviewer', 'debug')
 
 # Mot "lan xem" project ket thuc khi khong thay git status cua no trong chung nay giay.
-# Client lam moi ~15 s mot lan khi dang xem -> 45 s la du chac nguoi dung da roi di.
-VIEW_GAP = 45
+# Client lam moi ~60 s mot lan khi dang xem (do 10/11/2026; 29/10 la ~15 s). Duoi 60 s
+# thi MOI lan lam moi deu thanh "lan xem moi" -> project vua ngu tu dung lai sau <=60 s.
+VIEW_GAP = 90
+# Hai lan 'for-each-ref' cach nhau it hon chung nay giay coi la cung mot cu bam (moi cu
+# bam chay 2-3 lenh; neu roi vao 2 lan doc trace thi lan sau den sau khi da dung layout).
+CLICK_GAP = 15
 # Cho Orca khoi phuc tab cu xong (pane tu dang ky vai tro) truoc khi ket luan project
 # hong va dung lai. Chi cho khi project da co terminal; project trong thi dung ngay.
 RESTORE_SETTLE = 8
@@ -223,6 +230,14 @@ def sleep_project(path, why=''):
         orca('terminal', 'close', '--worktree', 'path:' + p['path'], '--all')
     forget_panes(p['path'])
     log('cho ngu %s%s' % (p['name'], ' (' + why + ')' if why else ''))
+
+
+def layout_tab(path, tab):
+    """Tab vua dong co chua pane vai tro (builder/reviewer/debug) da dang ky khong. Doc so
+    dang ky KHONG loc pane chet: pane vua bi dong van con ghi tab cua no. Khong chac thi
+    tra False - bo sot chi la khong don, con nham thi giet ca project."""
+    return any(v.get('tab') == tab for v in load_json(PANES, {}).values()
+               if v.get('path') == path)
 
 
 def forget_panes(path):
@@ -428,7 +443,8 @@ def cmd_watch():
 
     offset = os.path.getsize(TRACE) if os.path.exists(TRACE) else 0
     last_seen = {}          # path -> lan cuoi thay git status
-    suppressed = set()      # client vua dong tab: khong dung lai trong lan xem nay
+    last_click = {}         # path -> lan cuoi thay for-each-ref (nguoi dung bam project)
+    suppressed = set()      # client vua dong tab: khong dung lai cho toi khi bam lai
     last_view = None
     last_rid_check = time.time()
     paths = {p['path'] for p in projects()}
@@ -459,27 +475,41 @@ def cmd_watch():
         offset += cut + 1
         for raw in chunk[:cut].split(b'\n'):
             line = raw.decode('utf-8', 'replace')
-            if 'git.exec' in line and '"status"' in line:
+            if 'git.exec' in line and ('"status"' in line or '"for-each-ref"' in line):
                 m = re.search(r'"cwd":"([^"]+)"', line)
                 if not m:
                     continue
                 path = norm(m.group(1))
                 if path not in paths:
                     continue
+                click = False
+                if '"for-each-ref"' in line:
+                    # Bam project tren sidebar. Bam lai project vua ngu phai mo duoc ngay -
+                    # truoc day phai roi project >45 s moi mo lai (do 10/11/2026).
+                    click = now - last_click.get(path, 0) > CLICK_GAP
+                    last_click[path] = now
+                    if not click:
+                        continue
                 new_view = now - last_seen.get(path, 0) > VIEW_GAP
                 last_seen[path] = now
-                if new_view:
+                if new_view or click:
                     suppressed.discard(path)
                 changed = path != last_view
                 last_view = path
-                if (new_view or changed) and path not in suppressed:
-                    build_layout(path, 'nguoi dung mo')
+                if (new_view or changed or click) and path not in suppressed:
+                    build_layout(path, 'nguoi dung bam' if click else 'nguoi dung mo')
             elif 'session-tabs.close' in line and '"deviceId"' in line:
                 m = re.search(r'"worktree":"id:[^"]*?::([^"]+)"', line)
                 if m and norm(m.group(1)) in paths:
                     path = norm(m.group(1))
-                    suppressed.add(path)
                     last_view = path
+                    t = re.search(r'"tabId":"([^"]+)"', line)
+                    if t and not layout_tab(path, t.group(1)):
+                        # Dong tab phu (terminal tu mo them) - layout van song, KHONG ngu.
+                        # Truoc day dong tab nao cung ngu ca project (SDK_RV1126B 10/11).
+                        log('%s: client dong tab phu - giu layout' % project_of(path)['name'])
+                        continue
+                    suppressed.add(path)
                     sleep_project(path, 'client dong tab')
 
 
